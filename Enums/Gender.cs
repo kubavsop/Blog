@@ -1,4 +1,6 @@
-﻿namespace Blog.API.Data.Models;
+﻿
+
+namespace Blog.API.Enums;
 
 public enum Gender
 {
