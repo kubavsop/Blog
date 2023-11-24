@@ -18,6 +18,30 @@ public class UserService: IUserService
         _tokenService = tokenService;
     }
 
+    public async Task<User> GetUserAsync()
+    {
+        var email = _tokenService.GetUserEmail();
+        return await GetUserByEmail(email);
+    }
+
+    public async Task EditUserAsync(UserEdit userEdit)
+    {
+        var email = _tokenService.GetUserEmail();
+        var user = await GetUserByEmail(email);
+        
+        if (user.Email != userEdit.Email)
+        {
+            await CheckEmailExistenceAsync(userEdit.Email);
+        }
+        
+        user.Email = userEdit.Email;
+        user.PhoneNumber = userEdit.PhoneNumber;
+        user.Gender = userEdit.Gender;
+        user.FullName = userEdit.FullName;
+        user.BirthDate = userEdit.BirthDate;
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<TokenResponse> LoginUserAsync(LoginCredentials loginCredentials)
     {
         await CheckUserExistenceAsync(loginCredentials);

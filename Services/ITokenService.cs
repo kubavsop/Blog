@@ -3,5 +3,7 @@
 public interface ITokenService
 {
     Task InvalidateTokenAsync();
+
+    string GetUserEmail();
     Task<bool> CheckTokenAsync();
 }

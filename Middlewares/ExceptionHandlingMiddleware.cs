@@ -27,7 +27,7 @@ public class ExceptionHandlingMiddleware
         }
     }
 
-    private async Task SetExceptionAsync(HttpContext context, int status, string message)
+    private static async Task SetExceptionAsync(HttpContext context, int status, string message)
     {
         context.Response.StatusCode = StatusCodes.Status400BadRequest;
         await context.Response.WriteAsJsonAsync(new Error

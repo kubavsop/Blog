@@ -6,7 +6,7 @@ namespace Blog.API.Controllers.Mappers;
 
 internal static class UserMapper
 {
-    public static User UserDtoToUser(UserRegisterDto user)
+    public static User UserRegisterDtoToUser(UserRegisterDto user)
     {
         return new User
         {
@@ -32,6 +32,32 @@ internal static class UserMapper
         return new TokenResponseDto
         {
             Token = tokenResponse.Token
+        };
+    }
+
+    public static UserDto UserToUserDto(User user)
+    {
+        return new UserDto
+        {
+            Id = user.Id,
+            BirthDate = user.BirthDate,
+            Email = user.Email,
+            CreateTime = user.CreateTime,
+            FullName = user.FullName,
+            Gender = user.Gender,
+            PhoneNumber = user.PhoneNumber
+        };
+    }
+
+    public static UserEdit UserEditDtoToUserEdit(UserEditDto userEdit)
+    {
+        return new UserEdit
+        {
+            Email = userEdit.Email,
+            BirthDate = userEdit.BirthDate,
+            FullName = userEdit.FullName,
+            Gender = userEdit.Gender,
+            PhoneNumber = userEdit.PhoneNumber
         };
     }
 }

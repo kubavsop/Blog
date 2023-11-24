@@ -28,6 +28,10 @@ public class TokenService: ITokenService
         var tokenId = GetTokenId();
         return await _context.Tokens.AnyAsync(t => t.Id == tokenId);
     }
+    public string GetUserEmail()
+    {
+        return _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email)!;
+    }
     
     private Guid GetTokenId()
     {

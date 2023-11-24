@@ -1,7 +1,6 @@
 ﻿using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Controllers.Mappers;
-using Blog.API.Entities;
 using Blog.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +23,7 @@ public class UserController: ControllerBase
     public async Task<ActionResult<TokenResponseDto>> RegisterAsync(UserRegisterDto user)
     {
         var tokenResponseDto 
-            = UserMapper.TokenResponseToTokenResponseDto(await _userService.CreateUserAsync(UserMapper.UserDtoToUser(user)));
+            = UserMapper.TokenResponseToTokenResponseDto(await _userService.CreateUserAsync(UserMapper.UserRegisterDtoToUser(user)));
         return Ok(tokenResponseDto);
     }
 
@@ -42,6 +41,22 @@ public class UserController: ControllerBase
     public async Task<ActionResult> LogoutAsync()
     {
         await _userService.LogoutUserAsync();
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<ActionResult<UserDto>> GetProfileAsync()
+    {
+        var user = await _userService.GetUserAsync();
+        return Ok(UserMapper.UserToUserDto(user));
+    }
+
+    [Authorize]
+    [HttpPut("profile")]
+    public async Task<ActionResult> EditProfileAsync(UserEditDto userEditDto)
+    {
+        await _userService.EditUserAsync(UserMapper.UserEditDtoToUserEdit(userEditDto));
         return Ok();
     }
 }
