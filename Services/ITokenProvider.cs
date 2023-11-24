@@ -4,5 +4,5 @@ namespace Blog.API.Services;
 
 public interface ITokenProvider
 {
-    TokenResponse CreateToken(string email);
+    TokenResponse CreateToken(Guid id);
 }

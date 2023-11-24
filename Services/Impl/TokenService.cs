@@ -28,9 +28,9 @@ public class TokenService: ITokenService
         var tokenId = GetTokenId();
         return await _context.Tokens.AnyAsync(t => t.Id == tokenId);
     }
-    public string GetUserEmail()
+    public Guid GetUserId()
     {
-        return _httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Email)!;
+        return Guid.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Name)!);
     }
     
     private Guid GetTokenId()

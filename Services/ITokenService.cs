@@ -4,6 +4,6 @@ public interface ITokenService
 {
     Task InvalidateTokenAsync();
 
-    string GetUserEmail();
+    Guid GetUserId();
     Task<bool> CheckTokenAsync();
 }

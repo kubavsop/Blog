@@ -20,14 +20,14 @@ public class UserService: IUserService
 
     public async Task<User> GetUserAsync()
     {
-        var email = _tokenService.GetUserEmail();
-        return await GetUserByEmail(email);
+        var id = _tokenService.GetUserId();
+        return await GetUserById(id);
     }
 
     public async Task EditUserAsync(UserEdit userEdit)
     {
-        var email = _tokenService.GetUserEmail();
-        var user = await GetUserByEmail(email);
+        var id = _tokenService.GetUserId();
+        var user = await GetUserById(id);
         
         if (user.Email != userEdit.Email)
         {
@@ -44,8 +44,8 @@ public class UserService: IUserService
 
     public async Task<TokenResponse> LoginUserAsync(LoginCredentials loginCredentials)
     {
-        await CheckUserExistenceAsync(loginCredentials);
-        return _tokenProvider.CreateToken(loginCredentials.Email);
+        var id = await CheckUserExistenceAsync(loginCredentials);
+        return _tokenProvider.CreateToken(id);
     }
     
     public async Task<TokenResponse> CreateUserAsync(User user)
@@ -53,7 +53,7 @@ public class UserService: IUserService
         await CheckEmailExistenceAsync(user.Email);
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        return _tokenProvider.CreateToken(user.Email);
+        return _tokenProvider.CreateToken(user.Id);
     }
 
     public async Task LogoutUserAsync()
@@ -61,18 +61,20 @@ public class UserService: IUserService
         await _tokenService.InvalidateTokenAsync();
     }
     
-    private async Task CheckUserExistenceAsync(LoginCredentials credentials)
+    private async Task<Guid> CheckUserExistenceAsync(LoginCredentials credentials)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == credentials.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(credentials.Password, user.Password))
         {
             throw new UserNotFoundException("Incorrect login or password");
         }
+
+        return user.Id;
     }
     
-    private async Task<User> GetUserByEmail(string email)
+    private async Task<User> GetUserById(Guid id)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         if (user == null)
         {
             throw new UserNotFoundException("User not found");

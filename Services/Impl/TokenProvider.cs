@@ -15,7 +15,7 @@ public class TokenProvider: ITokenProvider
         _configuration = configuration;
     }
     
-    public TokenResponse CreateToken(string email) {
+    public TokenResponse CreateToken(Guid id) {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("AppSettings:SecretKey")!);
         var expireMinutes = _configuration.GetValue<double>("AppSettings:TokenExpireMinutes");
@@ -25,7 +25,7 @@ public class TokenProvider: ITokenProvider
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new (ClaimTypes.Email, email),
+                new (ClaimTypes.Name, id.ToString()),
                 new (ClaimTypes.NameIdentifier, tokenId.ToString())
             }),
             Expires = DateTime.UtcNow.AddMinutes(expireMinutes),
