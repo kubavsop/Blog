@@ -1,6 +1,4 @@
-﻿
-
-namespace Blog.API.Enums;
+﻿namespace Blog.API.Enums;
 
 public enum Gender
 {

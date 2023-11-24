@@ -2,7 +2,7 @@
 
 namespace Blog.API.Services;
 
-public interface IJwtService
+public interface ITokenProvider
 {
     TokenResponse CreateToken(string email);
 }

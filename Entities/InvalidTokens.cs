@@ -2,8 +2,7 @@
 
 namespace Blog.API.Entities;
 
-public class ExpiredToken
+public class InvalidTokens
 {
     public Guid Id { get; set; }
-    public string Token { get; set; }
 }

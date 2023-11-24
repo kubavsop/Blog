@@ -3,6 +3,7 @@ using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Controllers.Mappers;
 using Blog.API.Entities;
 using Blog.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.API.Controllers;
@@ -34,5 +35,13 @@ public class UserController: ControllerBase
         var tokenResponseDto
             = UserMapper.TokenResponseToTokenResponseDto(await _userService.LoginUserAsync(credentials));
         return Ok(tokenResponseDto);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<ActionResult> LogoutAsync()
+    {
+        await _userService.LogoutUserAsync();
+        return Ok();
     }
 }

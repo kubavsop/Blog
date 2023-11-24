@@ -1,14 +1,11 @@
-﻿
-
-using Blog.API.Controllers.Dto.Responses;
-using Blog.API.Middlewares.Exceptions;
+﻿using Blog.API.Middlewares.Exceptions;
 
 namespace Blog.API.Middlewares;
 
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
-    
+
     public ExceptionHandlingMiddleware(RequestDelegate next)
     {
         _next = next;

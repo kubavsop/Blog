@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231123115822_Initial")]
+    [Migration("20231124042014_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,6 +24,17 @@ namespace Blog.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Blog.API.Entities.InvalidTokens", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tokens");
+                });
 
             modelBuilder.Entity("Blog.API.Entities.User", b =>
                 {
@@ -53,6 +64,9 @@ namespace Blog.API.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
