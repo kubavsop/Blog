@@ -1,6 +1,6 @@
 ﻿using Blog.API.Enums;
 
-namespace Blog.API.Entities;
+namespace Blog.API.Entities.Database;
 
 public class User
 {
@@ -13,4 +13,7 @@ public class User
     public Gender Gender { get; set; }
     public string? PhoneNumber { get; set; }
     public string Email { get; set; }
+    
+    public ICollection<Post>? LikedPosts { get; set; }
+    public Author? Author { get; set; }
 }   

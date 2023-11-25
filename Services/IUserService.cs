@@ -1,5 +1,6 @@
 ﻿using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Entities;
+using Blog.API.Entities.Database;
 
 namespace Blog.API.Services;
 

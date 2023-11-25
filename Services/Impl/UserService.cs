@@ -1,5 +1,6 @@
 ﻿using Blog.API.Data;
 using Blog.API.Entities;
+using Blog.API.Entities.Database;
 using Blog.API.Middlewares.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,14 +21,12 @@ public class UserService: IUserService
 
     public async Task<User> GetUserAsync()
     {
-        var id = _tokenService.GetUserId();
-        return await GetUserById(id);
+        return await _tokenService.GetUserAsync();
     }
 
     public async Task EditUserAsync(UserEdit userEdit)
     {
-        var id = _tokenService.GetUserId();
-        var user = await GetUserById(id);
+        var user = await _tokenService.GetUserAsync();
         
         if (user.Email != userEdit.Email)
         {
@@ -68,18 +67,7 @@ public class UserService: IUserService
         {
             throw new UserNotFoundException("Incorrect login or password");
         }
-
         return user.Id;
-    }
-    
-    private async Task<User> GetUserById(Guid id)
-    {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
-        if (user == null)
-        {
-            throw new UserNotFoundException("User not found");
-        }
-        return user;
     }
 
     private async Task CheckEmailExistenceAsync(string email)

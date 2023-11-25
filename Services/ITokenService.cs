@@ -1,9 +1,11 @@
-﻿namespace Blog.API.Services;
+﻿using Blog.API.Entities.Database;
+
+namespace Blog.API.Services;
 
 public interface ITokenService
 {
     Task InvalidateTokenAsync();
 
-    Guid GetUserId();
+    Task<User> GetUserAsync();
     Task<bool> CheckTokenAsync();
 }

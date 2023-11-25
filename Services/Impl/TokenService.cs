@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using Blog.API.Data;
 using Blog.API.Entities;
+using Blog.API.Entities.Database;
+using Blog.API.Middlewares.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Services.Impl;
@@ -23,12 +25,29 @@ public class TokenService: ITokenService
         await _context.SaveChangesAsync();
     }
 
+    public async Task<User> GetUserAsync()
+    {
+        var id = GetUserId();
+        return await GetUserById(id);
+    }
+
     public async Task<bool> CheckTokenAsync()
     {
         var tokenId = GetTokenId();
         return await _context.Tokens.AnyAsync(t => t.Id == tokenId);
     }
-    public Guid GetUserId()
+    
+    private async Task<User> GetUserById(Guid id)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+        {
+            throw new UserNotFoundException("User not found");
+        }
+        return user;
+    }
+    
+    private Guid GetUserId()
     {
         return Guid.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Name)!);
     }

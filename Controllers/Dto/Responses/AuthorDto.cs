@@ -2,14 +2,12 @@
 
 namespace Blog.API.Controllers.Dto.Responses;
 
-public class UserDto
+public class AuthorDto
 {
-    public Guid Id { get; set; }
     public string FullName { get; set; }
     public DateTime? BirthDate { get; set; }
-
-    public DateTime CreateTime { get; set; }
     public Gender Gender { get; set; }
-    public string? PhoneNumber { get; set; }
-    public string Email { get; set; }
+    public int Posts { get; set; }
+    public int Likes { get; set; }
+    public DateTime Created { get; set; }
 }

@@ -1,6 +1,6 @@
 ﻿
 
-namespace Blog.API.Entities;
+namespace Blog.API.Entities.Database;
 
 public class InvalidTokens
 {
