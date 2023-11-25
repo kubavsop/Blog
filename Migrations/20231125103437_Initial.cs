@@ -46,30 +46,12 @@ namespace Blog.API.Migrations
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Gender = table.Column<int>(type: "integer", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
-                    Email = table.Column<string>(type: "text", nullable: false)
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Likes = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Authors",
-                columns: table => new
-                {
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Likes = table.Column<int>(type: "integer", nullable: false),
-                    Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Authors", x => x.UserId);
-                    table.ForeignKey(
-                        name: "FK_Authors_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,18 +63,18 @@ namespace Blog.API.Migrations
                     Title = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     ReadingTime = table.Column<int>(type: "integer", nullable: false),
-                    Image = table.Column<string>(type: "text", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: true),
                     Likes = table.Column<int>(type: "integer", nullable: false),
-                    AuthorUserId = table.Column<Guid>(type: "uuid", nullable: false)
+                    AuthorId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Posts_Authors_AuthorUserId",
-                        column: x => x.AuthorUserId,
-                        principalTable: "Authors",
-                        principalColumn: "UserId",
+                        name: "FK_Posts_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -145,9 +127,9 @@ namespace Blog.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Posts_AuthorUserId",
+                name: "IX_Posts_AuthorId",
                 table: "Posts",
-                column: "AuthorUserId");
+                column: "AuthorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostTag_TagsId",
@@ -183,9 +165,6 @@ namespace Blog.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Posts");
-
-            migrationBuilder.DropTable(
-                name: "Authors");
 
             migrationBuilder.DropTable(
                 name: "Users");

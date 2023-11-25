@@ -2,7 +2,6 @@
 using Blog.API.Entities;
 using Blog.API.Entities.Database;
 using Blog.API.Middlewares.Exceptions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Services.Impl;
@@ -29,15 +28,9 @@ public class PostService: IPostService
         };
         
         var user = await _tokenService.GetUserAsync();
-        
-        var author = await _context.Authors.FirstOrDefaultAsync(a => a.UserId == user.Id) ?? new Author
-        {
-            User = user
-        };
 
         var tags = await GetTags(createPost.Tags);
-
-        post.Author = author;
+        user.CreatedPosts.Add(post);
         post.Tags = tags;
         
         await _context.Posts.AddAsync(post);
@@ -47,11 +40,13 @@ public class PostService: IPostService
 
     private async Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId)
     {
+        var tagsIdList = tagsId.ToList();
+        
         var tags = await _context.Tags
-            .Where(t => tagsId.Contains(t.Id))
+            .Where(t => tagsIdList.Contains(t.Id))
             .ToListAsync();
         
-        if (tags.Count != tagsId.Count())
+        if (tags.Count != tagsIdList.Count)
         {
             throw new TagNotFoundException("Tag not found");
         }

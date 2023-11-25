@@ -22,22 +22,6 @@ namespace Blog.API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Blog.API.Entities.Database.Author", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Likes")
-                        .HasColumnType("integer");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("Authors");
-                });
-
             modelBuilder.Entity("Blog.API.Entities.Database.InvalidTokens", b =>
                 {
                     b.Property<Guid>("Id")
@@ -55,7 +39,7 @@ namespace Blog.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AuthorUserId")
+                    b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreateTime")
@@ -66,7 +50,6 @@ namespace Blog.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Likes")
@@ -81,7 +64,7 @@ namespace Blog.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorUserId");
+                    b.HasIndex("AuthorId");
 
                     b.ToTable("Posts");
                 });
@@ -125,6 +108,9 @@ namespace Blog.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<int>("Gender")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Likes")
                         .HasColumnType("integer");
 
                     b.Property<string>("Password")
@@ -172,22 +158,11 @@ namespace Blog.API.Migrations
                     b.ToTable("PostUser");
                 });
 
-            modelBuilder.Entity("Blog.API.Entities.Database.Author", b =>
-                {
-                    b.HasOne("Blog.API.Entities.Database.User", "User")
-                        .WithOne("Author")
-                        .HasForeignKey("Blog.API.Entities.Database.Author", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Blog.API.Entities.Database.Post", b =>
                 {
-                    b.HasOne("Blog.API.Entities.Database.Author", "Author")
-                        .WithMany("Posts")
-                        .HasForeignKey("AuthorUserId")
+                    b.HasOne("Blog.API.Entities.Database.User", "Author")
+                        .WithMany("CreatedPosts")
+                        .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -224,14 +199,9 @@ namespace Blog.API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Blog.API.Entities.Database.Author", b =>
-                {
-                    b.Navigation("Posts");
-                });
-
             modelBuilder.Entity("Blog.API.Entities.Database.User", b =>
                 {
-                    b.Navigation("Author");
+                    b.Navigation("CreatedPosts");
                 });
 #pragma warning restore 612, 618
         }

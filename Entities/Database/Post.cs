@@ -9,7 +9,9 @@ public class Post
     public int ReadingTime { get; set; }
     public string? Image { get; set; }
     public int Likes { get; set; }
-    public Author Author { get; set; }
-    public ICollection<User>? LikedUsers { get; set; }
-    public ICollection<Tag> Tags { get; set; }
+    
+    public User Author { get; set; }
+    
+    public ICollection<User> LikedUsers { get; set; } = new List<User>();
+    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

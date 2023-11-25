@@ -14,8 +14,6 @@ public class AppDbContext: DbContext
     
     public DbSet<Tag> Tags { get; set; }
     
-    public DbSet<Author> Authors { get; set; }
-    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -24,7 +22,9 @@ public class AppDbContext: DbContext
             .HasIndex(user => user.Email)
             .IsUnique();
 
-        builder.Entity<Author>()
-            .HasKey(a => a.UserId);
+        builder.Entity<Post>()
+            .HasOne(p => p.Author)
+            .WithMany(u => u.CreatedPosts)
+            .IsRequired();
     }
 }
