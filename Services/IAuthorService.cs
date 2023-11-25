@@ -1,6 +1,8 @@
-﻿namespace Blog.API.Services;
+﻿using Blog.API.Entities;
 
-public class IAuthorService
+namespace Blog.API.Services;
+
+public interface IAuthorService
 {
-    
+    Task<IEnumerable<Author>> GetAuthorsAsync();
 }
