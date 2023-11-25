@@ -46,6 +46,19 @@ public class TokenService: ITokenService
         }
         return user;
     }
+
+    public async Task<User> GetUserWithLikedPostsAsync()
+    {
+        var id = GetUserId();
+        var user = await _context.Users
+            .Include(user => user.LikedPosts)
+            .FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+        {
+            throw new UserNotFoundException("User not found");
+        }
+        return user;
+    }
     
     private Guid GetUserId()
     {

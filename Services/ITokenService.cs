@@ -7,5 +7,7 @@ public interface ITokenService
     Task InvalidateTokenAsync();
 
     Task<User> GetUserAsync();
+
+    Task<User> GetUserWithLikedPostsAsync();
     Task<bool> CheckTokenAsync();
 }

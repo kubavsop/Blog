@@ -38,6 +38,50 @@ public class PostService: IPostService
         return new PostResponse { PostId = post.Id };
     }
 
+    public async Task LikePostAsync(Guid id)
+    {
+        var user = await _tokenService.GetUserWithLikedPostsAsync();
+        EnsureNoLikeExists(user, id);
+        var post = await GetPostByIdAsync(id);
+        user.LikedPosts.Add(post);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UnlikePostAsync(Guid id)
+    {
+        var user = await _tokenService.GetUserWithLikedPostsAsync();
+        EnsureLikeExists(user, id);
+        var postToRemove = user.LikedPosts.FirstOrDefault(p => p.Id == id)!;
+        user.LikedPosts.Remove(postToRemove);
+        await _context.SaveChangesAsync();
+    }
+
+    private void EnsureNoLikeExists(User user, Guid postId)
+    {
+        if (user.LikedPosts.Any(p => p.Id == postId))
+        {
+            throw new LikeExistsException("Like on this post already set by user");
+        }
+    }
+
+    private void EnsureLikeExists(User user, Guid postId)
+    {
+        if (user.LikedPosts.All(p => p.Id != postId))
+        {
+            throw new LikeExistsException("There are no like from user by this post");
+        }
+    }
+
+    private async Task<Post> GetPostByIdAsync(Guid id)
+    {
+        var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+        if (post == null)
+        {
+            throw new PostNotFoundException($"Post with id={id} not found in  database");
+        }
+        return post;
+    }
+    
     private async Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId)
     {
         var tagsIdList = tagsId.ToList();
