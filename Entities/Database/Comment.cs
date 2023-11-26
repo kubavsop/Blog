@@ -11,6 +11,10 @@ public class Comment
     public DateTime? ModifiedDate { get; set; }
     public DateTime? DeleteDate { get; set; }
     public int SubComments { get; set; }
+    
+    public Guid AuthorId { get; set; }
+    public Guid PostId { get; set; }
+    
     public User Author { get; set; }
     public Post Post { get; set; }
 }

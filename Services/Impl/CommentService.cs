@@ -64,7 +64,6 @@ public class CommentService : ICommentService
         if (parentCommentId == null) return post;
         
         var parentComment = await _context.Comments
-            .Include(c => c.Post)
             .FirstOrDefaultAsync(c => c.Id == parentCommentId);
 
         if (parentComment == null)
@@ -73,7 +72,7 @@ public class CommentService : ICommentService
                 $"Comment with id={parentCommentId} not found in  database");
         }
 
-        if (parentComment.Post.Id != id)
+        if (parentComment.PostId != id)
         {
             throw new ParentCommentDetachedFromPostException("Parent comment does not belong to post");
         }
