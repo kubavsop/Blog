@@ -24,6 +24,7 @@ public class CommentService : ICommentService
     
     public async Task AddCommentAsync(CreateComment comment, Guid postId)
     {
+        // TODO Community work
         var user = await _tokenService.GetUserAsync();
         var post = await GetPostByIdAsyncWithCheck(postId, comment.ParentId);
         var newComment = new Comment
@@ -31,8 +32,11 @@ public class CommentService : ICommentService
             ParentId = comment.ParentId,
             Content = comment.Content,
         };
+        
         user.Comments.Add(newComment);
         post.Comments.Add(newComment);
+        post.CommentsCount += 1;
+        
         await _context.SaveChangesAsync();
     }
 
@@ -50,17 +54,28 @@ public class CommentService : ICommentService
     private async Task<Post> GetPostByIdAsyncWithCheck(Guid id, Guid? parentCommentId)
     {
         var post = await _context.Posts
-            .Include(p => p.Comments)
             .FirstOrDefaultAsync(p => p.Id == id);
+        
         if (post == null)
         {
             throw new PostNotFoundException($"Post with id={id} not found in database");
         }
 
-        if (parentCommentId != null && post.Comments.All(c => c.Id != parentCommentId))
+        if (parentCommentId == null) return post;
+        
+        var parentComment = await _context.Comments
+            .Include(c => c.Post)
+            .FirstOrDefaultAsync(c => c.Id == parentCommentId);
+
+        if (parentComment == null)
         {
             throw new CommentNotFoundException(
-                $"A post with id = {id} does not have a comment with id = {parentCommentId}");
+                $"Comment with id={parentCommentId} not found in  database");
+        }
+
+        if (parentComment.Post.Id != id)
+        {
+            throw new ParentCommentDetachedFromPostException("Parent comment does not belong to post");
         }
 
         return post;

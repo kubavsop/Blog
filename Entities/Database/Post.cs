@@ -9,6 +9,8 @@ public class Post
     public int ReadingTime { get; set; }
     public string? Image { get; set; }
     public int Likes { get; set; }
+
+    public int CommentsCount { get; set; } 
     
     public User Author { get; set; }
     

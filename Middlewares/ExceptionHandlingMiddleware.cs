@@ -41,6 +41,10 @@ public class ExceptionHandlingMiddleware
         {
             await SetExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
         }
+        catch (ParentCommentDetachedFromPostException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+        }
     }
 
     private static async Task SetExceptionAsync(HttpContext context, int status, string message)

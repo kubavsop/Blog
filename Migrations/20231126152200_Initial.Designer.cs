@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231126080555_Initial")]
+    [Migration("20231126152200_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -84,6 +84,9 @@ namespace Blog.API.Migrations
 
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("CommentsCount")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("timestamp with time zone");

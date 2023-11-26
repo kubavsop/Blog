@@ -82,6 +82,9 @@ namespace Blog.API.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("CommentsCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("timestamp with time zone");
 

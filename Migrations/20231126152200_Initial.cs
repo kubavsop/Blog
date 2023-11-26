@@ -65,6 +65,7 @@ namespace Blog.API.Migrations
                     ReadingTime = table.Column<int>(type: "integer", nullable: false),
                     Image = table.Column<string>(type: "text", nullable: true),
                     Likes = table.Column<int>(type: "integer", nullable: false),
+                    CommentsCount = table.Column<int>(type: "integer", nullable: false),
                     AuthorId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
