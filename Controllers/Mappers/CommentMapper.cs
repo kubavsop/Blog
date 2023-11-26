@@ -13,4 +13,12 @@ internal static class CommentMapper
             ParentId = commentDto.ParentId
         };
     }
+
+    public static UpdateComment UpdateCommentDtoToUpdateComment(UpdateCommentDto updateComment)
+    {
+        return new UpdateComment
+        {
+            Content = updateComment.Content
+        };
+    }
 }

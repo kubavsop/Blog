@@ -42,7 +42,18 @@ public class CommentService : ICommentService
 
     public async Task EditCommentAsync(UpdateComment updateComment, Guid commentId)
     {
-        throw new NotImplementedException();
+        var comment = await GetCommentAsync(commentId);
+        var userId = _tokenService.GetUserId();
+        
+        if (userId != comment.AuthorId)
+        {
+            throw new CommentOwnerMismatchException($"The user with id={userId} is not the author of the comment");
+        }
+
+        comment.Content = updateComment.Content;
+        comment.ModifiedDate = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteCommentAsync(Guid commentId)
@@ -50,7 +61,20 @@ public class CommentService : ICommentService
         throw new NotImplementedException();
     }
 
+    private async Task<Comment> GetCommentAsync(Guid commentId)
+    {
+        var comment = await _context.Comments
+            .FirstOrDefaultAsync(c => c.Id == commentId);
+        
+        if (comment == null)
+        {
+            throw new CommentNotFoundException(
+                $"Comment with id={commentId} not found in database");
+        }
 
+        return comment;
+    }
+    
     private async Task<Post> GetPostByIdAsyncWithCheck(Guid id, Guid? parentCommentId)
     {
         var post = await _context.Posts
@@ -69,7 +93,7 @@ public class CommentService : ICommentService
         if (parentComment == null)
         {
             throw new CommentNotFoundException(
-                $"Comment with id={parentCommentId} not found in  database");
+                $"Comment with id={parentCommentId} not found in database");
         }
 
         if (parentComment.PostId != id)

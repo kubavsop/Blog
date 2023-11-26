@@ -8,6 +8,8 @@ public interface ITokenService
 
     Task<User> GetUserAsync();
 
+    Guid GetUserId();
+
     Task<User> GetUserWithLikedPostsAsync();
     Task<bool> CheckTokenAsync();
 }

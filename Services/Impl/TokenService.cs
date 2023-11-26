@@ -60,7 +60,7 @@ public class TokenService: ITokenService
         return user;
     }
     
-    private Guid GetUserId()
+    public Guid GetUserId()
     {
         return Guid.Parse(_httpContextAccessor.HttpContext!.User.FindFirstValue(ClaimTypes.Name)!);
     }
