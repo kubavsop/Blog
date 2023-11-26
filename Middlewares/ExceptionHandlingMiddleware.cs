@@ -37,14 +37,18 @@ public class ExceptionHandlingMiddleware
         {
             await SetExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
         }
+        catch (CommentNotFoundException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
+        }
     }
 
     private static async Task SetExceptionAsync(HttpContext context, int status, string message)
     {
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        context.Response.StatusCode = status;
         await context.Response.WriteAsJsonAsync(new Error
         {
-            StatusCode = StatusCodes.Status400BadRequest,
+            StatusCode = status,
             Message = message
         });
     }

@@ -14,4 +14,6 @@ public class Post
     
     public ICollection<User> LikedUsers { get; set; } = new List<User>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+    
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
 }

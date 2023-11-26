@@ -22,6 +22,46 @@ namespace Blog.API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Blog.API.Entities.Database.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SubComments")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("Comments");
+                });
+
             modelBuilder.Entity("Blog.API.Entities.Database.InvalidTokens", b =>
                 {
                     b.Property<Guid>("Id")
@@ -158,6 +198,25 @@ namespace Blog.API.Migrations
                     b.ToTable("PostUser");
                 });
 
+            modelBuilder.Entity("Blog.API.Entities.Database.Comment", b =>
+                {
+                    b.HasOne("Blog.API.Entities.Database.User", "Author")
+                        .WithMany("Comments")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blog.API.Entities.Database.Post", "Post")
+                        .WithMany("Comments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("Blog.API.Entities.Database.Post", b =>
                 {
                     b.HasOne("Blog.API.Entities.Database.User", "Author")
@@ -199,8 +258,15 @@ namespace Blog.API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Blog.API.Entities.Database.Post", b =>
+                {
+                    b.Navigation("Comments");
+                });
+
             modelBuilder.Entity("Blog.API.Entities.Database.User", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("CreatedPosts");
                 });
 #pragma warning restore 612, 618

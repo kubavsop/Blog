@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Services.Impl;
 
-public class UserService: IUserService
+public class UserService : IUserService
 {
     private readonly AppDbContext _context;
     private readonly ITokenProvider _tokenProvider;
@@ -27,12 +27,12 @@ public class UserService: IUserService
     public async Task EditUserAsync(UserEdit userEdit)
     {
         var user = await _tokenService.GetUserAsync();
-        
+
         if (user.Email != userEdit.Email)
         {
             await CheckEmailExistenceAsync(userEdit.Email);
         }
-        
+
         user.Email = userEdit.Email;
         user.PhoneNumber = userEdit.PhoneNumber;
         user.Gender = userEdit.Gender;
@@ -46,7 +46,7 @@ public class UserService: IUserService
         var id = await CheckUserExistenceAsync(loginCredentials);
         return _tokenProvider.CreateToken(id);
     }
-    
+
     public async Task<TokenResponse> CreateUserAsync(User user)
     {
         await CheckEmailExistenceAsync(user.Email);
@@ -59,7 +59,7 @@ public class UserService: IUserService
     {
         await _tokenService.InvalidateTokenAsync();
     }
-    
+
     private async Task<Guid> CheckUserExistenceAsync(LoginCredentials credentials)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == credentials.Email);
@@ -67,6 +67,7 @@ public class UserService: IUserService
         {
             throw new UserNotFoundException("Incorrect login or password");
         }
+
         return user.Id;
     }
 
