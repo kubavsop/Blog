@@ -28,7 +28,7 @@ public class CommentService : ICommentService
 
         var comments = new LinkedList<Comment>();
         
-        await GetCommentTreeAsync(comments, comment.Id);
+        await GetCommentTreeAsync(comments, comment);
         
         return comments;
     }
@@ -99,21 +99,34 @@ public class CommentService : ICommentService
         await _context.SaveChangesAsync();
     }
 
-    private async Task GetCommentTreeAsync(LinkedList<Comment> comments, Guid commentId)
+    private async Task GetCommentTreeAsync(LinkedList<Comment> comments, Comment rootComment)
     {
+        var stack = new Stack<Comment>();
+
+        await GetSubComments(stack, rootComment);
+
+        while (stack.Count > 0)
+        {
+            var currentComment = stack.Pop();
+            
+            comments.AddLast(currentComment);
+
+            await GetSubComments(stack, currentComment);
+        }
+    }
+
+    private async Task GetSubComments(Stack<Comment> stack, Comment comment)
+    {
+        
         var subComments = await _context.Comments
             .Include(c => c.Author)
-            .Where(c => c.ParentId == commentId)
+            .Where(c => c.ParentId == comment.Id)
+            .OrderByDescending(c => c.CreateTime)
             .ToListAsync();
-        
-        foreach (var comment in subComments)
+
+        foreach (var subComment in subComments)
         {
-            comments.AddLast(comment);
-            
-            if (comment.SubComments != 0){
-                await GetCommentTreeAsync(comments, comment.Id);
-            }
-            
+            stack.Push(subComment);
         }
     }
 

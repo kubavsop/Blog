@@ -1,7 +1,6 @@
 ﻿using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Controllers.Mappers;
-using Blog.API.Entities;
 using Blog.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
