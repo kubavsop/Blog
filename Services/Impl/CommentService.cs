@@ -19,7 +19,18 @@ public class CommentService : ICommentService
 
     public async Task<IEnumerable<Comment>> GetCommentsAsync(Guid commentId)
     {
-        throw new NotImplementedException();
+        var comment = await GetCommentAsync(commentId);
+        
+        if (comment.ParentId != null)
+        {
+            throw new RootCommentException($"Comment with id={commentId} is not a root element");
+        }
+
+        var comments = new LinkedList<Comment>();
+        
+        await GetCommentTreeAsync(comments, comment.Id);
+        
+        return comments;
     }
 
     public async Task AddCommentAsync(CreateComment comment, Guid postId)
@@ -86,6 +97,24 @@ public class CommentService : ICommentService
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    private async Task GetCommentTreeAsync(LinkedList<Comment> comments, Guid commentId)
+    {
+        var subComments = await _context.Comments
+            .Include(c => c.Author)
+            .Where(c => c.ParentId == commentId)
+            .ToListAsync();
+        
+        foreach (var comment in subComments)
+        {
+            comments.AddLast(comment);
+            
+            if (comment.SubComments != 0){
+                await GetCommentTreeAsync(comments, comment.Id);
+            }
+            
+        }
     }
 
     private void CheckAuthor(Guid authorId)

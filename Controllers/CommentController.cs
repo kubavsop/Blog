@@ -1,4 +1,5 @@
 ﻿using Blog.API.Controllers.Dto.Requests;
+using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Controllers.Mappers;
 using Blog.API.Entities;
 using Blog.API.Services;
@@ -16,6 +17,13 @@ public class CommentController : ControllerBase
     public CommentController(ICommentService commentService)
     {
         _commentService = commentService;
+    }
+
+    [HttpGet("comment/{id:guid}/tree")]
+    public async Task<ActionResult<IEnumerable<CommentDto>>> GetCommentsAsync(Guid id)
+    {
+        var comments = await _commentService.GetCommentsAsync(id);
+        return Ok(CommentMapper.CommentsToCommentsDto(comments));
     }
 
     [Authorize]
@@ -41,4 +49,6 @@ public class CommentController : ControllerBase
         await _commentService.DeleteCommentAsync(id);
         return Ok();
     }
+
+    
 }
