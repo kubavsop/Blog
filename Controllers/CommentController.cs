@@ -33,4 +33,12 @@ public class CommentController : ControllerBase
         await _commentService.EditCommentAsync(CommentMapper.UpdateCommentDtoToUpdateComment(updateCommentDto), id);
         return Ok();
     }
+
+    [Authorize]
+    [HttpDelete("comment/{id:guid}")]
+    public async Task<ActionResult> DeleteCommentAsync(Guid id)
+    {
+        await _commentService.DeleteCommentAsync(id);
+        return Ok();
+    }
 }

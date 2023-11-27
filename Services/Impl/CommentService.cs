@@ -43,13 +43,14 @@ public class CommentService : ICommentService
     public async Task EditCommentAsync(UpdateComment updateComment, Guid commentId)
     {
         var comment = await GetCommentAsync(commentId);
-        var userId = _tokenService.GetUserId();
-        
-        if (userId != comment.AuthorId)
-        {
-            throw new CommentOwnerMismatchException($"The user with id={userId} is not the author of the comment");
-        }
 
+        if (comment.DeleteDate != null)
+        {
+            throw new CommentDeletionException($"Comment with id={commentId} is deleted");
+        }
+        
+        CheckAuthor(comment.AuthorId);
+        
         comment.Content = updateComment.Content;
         comment.ModifiedDate = DateTime.UtcNow;
 
@@ -58,7 +59,42 @@ public class CommentService : ICommentService
 
     public async Task DeleteCommentAsync(Guid commentId)
     {
-        throw new NotImplementedException();
+        var comment = await GetCommentAsync(commentId);
+        
+        CheckAuthor(comment.AuthorId);
+
+        if (comment.DeleteDate != null)
+        {
+            throw new CommentDeletionException($"This comment with id={commentId} has already been deleted");
+        }
+        
+        comment.ModifiedDate = DateTime.UtcNow;
+        comment.DeleteDate = DateTime.UtcNow;
+        comment.Content = string.Empty;
+
+        if (comment.SubComments == 0)
+        {
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == comment.PostId);
+            _context.Comments.Remove(comment);
+            post!.CommentsCount -= 1;
+            
+            if (comment.ParentId != null)
+            {
+                var parentComment = await GetCommentAsync(comment.ParentId.GetValueOrDefault());
+                parentComment.SubComments -= 1;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    private void CheckAuthor(Guid authorId)
+    {
+        var userId = _tokenService.GetUserId();
+        if (userId != authorId)
+        {
+            throw new CommentOwnerMismatchException($"The user with id={userId} is not the author of the comment");
+        }
     }
 
     private async Task<Comment> GetCommentAsync(Guid commentId)
