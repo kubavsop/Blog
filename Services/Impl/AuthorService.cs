@@ -27,6 +27,7 @@ public class AuthorService: IAuthorService
                 Likes = user.Likes,
                 Created = user.CreateTime
             })
+            .OrderBy(author => author.FullName)
             .ToListAsync();
     }
 }
