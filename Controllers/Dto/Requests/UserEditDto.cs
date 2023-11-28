@@ -1,12 +1,26 @@
-﻿using Blog.API.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using Blog.API.Common.Enums;
+using Blog.API.Controllers.Dto.CustomValidationAttributes;
 
 namespace Blog.API.Controllers.Dto.Requests;
 
 public class UserEditDto
 {
+    [Required]
+    [MinLength(1)]
     public string FullName { get; set; }
+    
+    [Date]
     public DateTime? BirthDate { get; set; }
-    public string Email { get; set; }
+    
+    [Required]
     public Gender Gender { get; set; }
+    
+    [CustomPhone]
     public string? PhoneNumber { get; set; }
+    
+    [Required]
+    [MinLength(1)]
+    [EmailAddress]
+    public string Email { get; set; }
 }   

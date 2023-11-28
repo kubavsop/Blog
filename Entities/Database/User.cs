@@ -1,4 +1,4 @@
-﻿using Blog.API.Enums;
+﻿using Blog.API.Common.Enums;
 
 namespace Blog.API.Entities.Database;
 

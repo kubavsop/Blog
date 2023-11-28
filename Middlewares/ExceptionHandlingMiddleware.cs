@@ -1,4 +1,4 @@
-﻿using Blog.API.Middlewares.Exceptions;
+﻿using Blog.API.Common.Exceptions;
 
 namespace Blog.API.Middlewares;
 

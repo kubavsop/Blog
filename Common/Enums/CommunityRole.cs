@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Blog.API.Enums;
+namespace Blog.API.Common.Enums;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Gender
+public enum CommunityRole
 {
-    Male,
-    Female
+    Administrator,
+    Subscriber
 }

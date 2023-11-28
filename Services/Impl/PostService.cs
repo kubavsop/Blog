@@ -1,7 +1,7 @@
-﻿using Blog.API.Data;
+﻿using Blog.API.Common.Exceptions;
+using Blog.API.Data;
 using Blog.API.Entities;
 using Blog.API.Entities.Database;
-using Blog.API.Middlewares.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Services.Impl;

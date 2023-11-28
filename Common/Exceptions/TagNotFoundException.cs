@@ -1,4 +1,4 @@
-﻿namespace Blog.API.Middlewares.Exceptions;
+﻿namespace Blog.API.Common.Exceptions;
 
 public class TagNotFoundException: Exception
 {

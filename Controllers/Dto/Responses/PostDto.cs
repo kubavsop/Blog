@@ -1,6 +1,6 @@
 ﻿namespace Blog.API.Controllers.Dto.Responses;
 
-public class PostDto
+public class PostDto // TODO
 {
     public Guid Id { get; set; }
     public DateTime CreateTime { get; set; }
