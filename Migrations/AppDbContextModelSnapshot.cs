@@ -49,6 +49,8 @@ namespace Blog.API.Migrations
 
                     b.HasKey("ObjectId");
 
+                    b.HasIndex("NormalizedText");
+
                     b.HasIndex("ObjectGuid")
                         .IsUnique();
 
@@ -92,9 +94,39 @@ namespace Blog.API.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("ParentId");
+
                     b.HasIndex("PostId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("Blog.API.Entities.Database.Community", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SubscribersCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Communities");
                 });
 
             modelBuilder.Entity("Blog.API.Entities.Database.InvalidTokens", b =>
@@ -120,6 +152,9 @@ namespace Blog.API.Migrations
                     b.Property<int>("CommentsCount")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("CommunityId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("timestamp with time zone");
 
@@ -143,6 +178,8 @@ namespace Blog.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
+
+                    b.HasIndex("CommunityId");
 
                     b.ToTable("Posts");
                 });
@@ -206,6 +243,24 @@ namespace Blog.API.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Blog.API.Entities.Database.UserCommunity", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CommunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "CommunityId");
+
+                    b.HasIndex("CommunityId");
+
+                    b.ToTable("UserCommunity");
+                });
+
             modelBuilder.Entity("PostTag", b =>
                 {
                     b.Property<Guid>("PostsId")
@@ -263,7 +318,32 @@ namespace Blog.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Blog.API.Entities.Database.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId");
+
                     b.Navigation("Author");
+
+                    b.Navigation("Community");
+                });
+
+            modelBuilder.Entity("Blog.API.Entities.Database.UserCommunity", b =>
+                {
+                    b.HasOne("Blog.API.Entities.Database.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blog.API.Entities.Database.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Community");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PostTag", b =>

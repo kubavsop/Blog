@@ -26,7 +26,7 @@ public class CommentService : ICommentService
             throw new RootCommentException($"Comment with id={commentId} is not a root element");
         }
 
-        var comments = new LinkedList<Comment>();
+        var comments = new List<Comment>();
         
         await GetCommentTreeAsync(comments, comment);
         
@@ -99,7 +99,7 @@ public class CommentService : ICommentService
         await _context.SaveChangesAsync();
     }
 
-    private async Task GetCommentTreeAsync(LinkedList<Comment> comments, Comment rootComment)
+    private async Task GetCommentTreeAsync(List<Comment> comments, Comment rootComment)
     {
         var stack = new Stack<Comment>();
 
@@ -109,7 +109,7 @@ public class CommentService : ICommentService
         {
             var currentComment = stack.Pop();
             
-            comments.AddLast(currentComment);
+            comments.Add(currentComment);
 
             await GetSubComments(stack, currentComment);
         }

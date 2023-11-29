@@ -12,6 +12,7 @@ public class Post
 
     public int CommentsCount { get; set; } 
     
+    public Community? Community { get; set; }
     public User Author { get; set; }
     
     public ICollection<User> LikedUsers { get; set; } = new List<User>();

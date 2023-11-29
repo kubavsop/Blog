@@ -19,4 +19,6 @@ public class User
     public ICollection<Post> CreatedPosts { get; set; } = new List<Post>();
 
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    public ICollection<Community> Communities { get; set; } = new List<Community>();
 }   

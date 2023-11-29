@@ -30,6 +30,22 @@ namespace Blog.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Communities",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    IsClosed = table.Column<bool>(type: "boolean", nullable: false),
+                    SubscribersCount = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Communities", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tags",
                 columns: table => new
                 {
@@ -84,14 +100,45 @@ namespace Blog.API.Migrations
                     Image = table.Column<string>(type: "text", nullable: true),
                     Likes = table.Column<int>(type: "integer", nullable: false),
                     CommentsCount = table.Column<int>(type: "integer", nullable: false),
+                    CommunityId = table.Column<Guid>(type: "uuid", nullable: true),
                     AuthorId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Posts_Communities_CommunityId",
+                        column: x => x.CommunityId,
+                        principalTable: "Communities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Posts_Users_AuthorId",
                         column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserCommunity",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CommunityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserCommunity", x => new { x.UserId, x.CommunityId });
+                    table.ForeignKey(
+                        name: "FK_UserCommunity_Communities_CommunityId",
+                        column: x => x.CommunityId,
+                        principalTable: "Communities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserCommunity_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -177,9 +224,30 @@ namespace Blog.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AddressElements_NormalizedText",
+                table: "AddressElements",
+                column: "NormalizedText");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AddressElements_ObjectGuid",
+                table: "AddressElements",
+                column: "ObjectGuid",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AddressElements_ParentObjId",
+                table: "AddressElements",
+                column: "ParentObjId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Comments_AuthorId",
                 table: "Comments",
                 column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_ParentId",
+                table: "Comments",
+                column: "ParentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_PostId",
@@ -192,6 +260,11 @@ namespace Blog.API.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Posts_CommunityId",
+                table: "Posts",
+                column: "CommunityId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PostTag_TagsId",
                 table: "PostTag",
                 column: "TagsId");
@@ -200,6 +273,11 @@ namespace Blog.API.Migrations
                 name: "IX_PostUser_LikedUsersId",
                 table: "PostUser",
                 column: "LikedUsersId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserCommunity_CommunityId",
+                table: "UserCommunity",
+                column: "CommunityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
@@ -227,10 +305,16 @@ namespace Blog.API.Migrations
                 name: "Tokens");
 
             migrationBuilder.DropTable(
+                name: "UserCommunity");
+
+            migrationBuilder.DropTable(
                 name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Posts");
+
+            migrationBuilder.DropTable(
+                name: "Communities");
 
             migrationBuilder.DropTable(
                 name: "Users");

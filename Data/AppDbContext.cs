@@ -3,24 +3,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Data;
 
-public class AppDbContext: DbContext
+public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
     public DbSet<User> Users { get; set; }
     public DbSet<InvalidTokens> Tokens { get; set; }
-    
+
     public DbSet<Post> Posts { get; set; }
-    
+
     public DbSet<Tag> Tags { get; set; }
-    
+
     public DbSet<Comment> Comments { get; set; }
-    
+
     public DbSet<AddressElement> AddressElements { get; set; }
-    
+
+    public DbSet<Community> Communities { get; set; }
+
+    public DbSet<UserCommunity> UserCommunity { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
         builder.Entity<User>()
             .HasIndex(user => user.Email)
             .IsUnique();
@@ -30,11 +35,28 @@ public class AppDbContext: DbContext
             .WithMany(u => u.CreatedPosts)
             .IsRequired();
 
+        builder.Entity<Comment>()
+            .HasIndex(c => c.ParentId);
+
         builder.Entity<AddressElement>()
             .HasIndex(a => a.ParentObjId);
-        
+
         builder.Entity<AddressElement>()
             .HasIndex(a => a.ObjectGuid)
             .IsUnique();
+
+        builder.Entity<AddressElement>()
+            .HasIndex(a => a.NormalizedText);
+
+        builder.Entity<AddressElement>()
+            .HasKey(a => a.ObjectId);
+
+        builder.Entity<UserCommunity>()
+            .HasKey(userCommunity => new { userCommunity.UserId, userCommunity.CommunityId });
+
+        builder.Entity<Community>()
+            .HasMany(c => c.Subscribers)
+            .WithMany(u => u.Communities)
+            .UsingEntity<UserCommunity>();
     }
 }

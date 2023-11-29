@@ -5,7 +5,6 @@ namespace Blog.API.Entities.Database;
 
 public class AddressElement
 {
-    [Key]
     public long ObjectId { get; set; }
     public Guid ObjectGuid { get; set; }
     public long ParentObjId { get; set; }
