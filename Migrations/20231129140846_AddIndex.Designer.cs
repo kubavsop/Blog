@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231126152200_Initial")]
-    partial class Initial
+    [Migration("20231129140846_AddIndex")]
+    partial class AddIndex
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,41 @@ namespace Blog.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Blog.API.Entities.Database.AddressElement", b =>
+                {
+                    b.Property<long>("ObjectId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ObjectId"));
+
+                    b.Property<string>("NormalizedText")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ObjectGuid")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ObjectLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("ParentObjId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ObjectId");
+
+                    b.HasIndex("ObjectGuid")
+                        .IsUnique();
+
+                    b.HasIndex("ParentObjId");
+
+                    b.ToTable("AddressElements");
+                });
 
             modelBuilder.Entity("Blog.API.Entities.Database.Comment", b =>
                 {

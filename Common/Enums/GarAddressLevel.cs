@@ -5,7 +5,7 @@ namespace Blog.API.Common.Enums;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum GarAddressLevel
 {
-    Region,
+    Region = 1,
     AdministrativeArea,
     MunicipalArea,
     RuralUrbanSettlement,

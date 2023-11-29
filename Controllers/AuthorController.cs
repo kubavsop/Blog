@@ -1,5 +1,5 @@
-﻿using Blog.API.Controllers.Dto.Responses;
-using Blog.API.Controllers.Mappers;
+﻿using Blog.API.Common.Mappers;
+using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Services;
 using Microsoft.AspNetCore.Mvc;
 

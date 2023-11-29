@@ -1,7 +1,7 @@
 ﻿using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Entities;
 
-namespace Blog.API.Controllers.Mappers;
+namespace Blog.API.Common.Mappers;
 
 internal static class AuthorMapper
 {

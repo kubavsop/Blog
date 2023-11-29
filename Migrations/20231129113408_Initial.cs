@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -11,6 +12,23 @@ namespace Blog.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AddressElements",
+                columns: table => new
+                {
+                    ObjectId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ObjectGuid = table.Column<Guid>(type: "uuid", nullable: false),
+                    ParentObjId = table.Column<long>(type: "bigint", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    NormalizedText = table.Column<string>(type: "text", nullable: false),
+                    ObjectLevel = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AddressElements", x => x.ObjectId);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Tags",
                 columns: table => new
@@ -193,6 +211,9 @@ namespace Blog.API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AddressElements");
+
             migrationBuilder.DropTable(
                 name: "Comments");
 

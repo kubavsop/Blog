@@ -5,7 +5,7 @@ namespace Blog.API.Data;
 
 public class AppDbContext: DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){}
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
     public DbSet<User> Users { get; set; }
     public DbSet<InvalidTokens> Tokens { get; set; }
     
@@ -14,6 +14,8 @@ public class AppDbContext: DbContext
     public DbSet<Tag> Tags { get; set; }
     
     public DbSet<Comment> Comments { get; set; }
+    
+    public DbSet<AddressElement> AddressElements { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,5 +29,12 @@ public class AppDbContext: DbContext
             .HasOne(p => p.Author)
             .WithMany(u => u.CreatedPosts)
             .IsRequired();
+
+        builder.Entity<AddressElement>()
+            .HasIndex(a => a.ParentObjId);
+        
+        builder.Entity<AddressElement>()
+            .HasIndex(a => a.ObjectGuid)
+            .IsUnique();
     }
 }
