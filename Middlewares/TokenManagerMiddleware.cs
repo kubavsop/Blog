@@ -16,6 +16,7 @@ public class TokenManagerMiddleware
     public async Task InvokeAsync(HttpContext context, ITokenService tokenService)
     {
         var hasAuthorizeAttribute = context.GetEndpoint()?.Metadata.GetMetadata<AuthorizeAttribute>() == null;
+        
         if (hasAuthorizeAttribute || !await tokenService.CheckTokenAsync())
         {
             await _next(context);

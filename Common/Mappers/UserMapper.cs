@@ -61,4 +61,9 @@ internal static class UserMapper
             PhoneNumber = userEdit.PhoneNumber
         };
     }
+
+    public static IEnumerable<UserDto> UsersToUsersDto(IEnumerable<User> users)
+    {
+        return users.Select(UserToUserDto);
+    }
 }

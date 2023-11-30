@@ -69,6 +69,18 @@ public class ExceptionHandlingMiddleware
         {
             await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
         }
+        catch (CommunityNotFoundException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
+        }
+        catch (UserRoleException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+        }
+        catch (Exception exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status500InternalServerError, exception.Message);
+        }
     }
 
     private static async Task SetExceptionAsync(HttpContext context, int status, string message)
@@ -76,14 +88,14 @@ public class ExceptionHandlingMiddleware
         context.Response.StatusCode = status;
         await context.Response.WriteAsJsonAsync(new Error
         {
-            StatusCode = status,
+            StatusCode = "Error",
             Message = message
         });
     }
-    
+
     private class Error
     {
-        public int StatusCode { get; set; }
+        public string StatusCode { get; set; }
         public string Message { get; set; }
     }
 }

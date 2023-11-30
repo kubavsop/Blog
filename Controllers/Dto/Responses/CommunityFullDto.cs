@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Blog.API.Controllers.Dto.CustomValidationAttributes;
 
 namespace Blog.API.Controllers.Dto.Responses;
 
-public class CommunityDto
+public class CommunityFullDto
 {
     [Required]
     public Guid Id { get; set; }
@@ -26,4 +26,7 @@ public class CommunityDto
     [Required]
     [DefaultValue(0)]
     public int SubscribersCount { get; set; }
+    
+    [Required]
+    public IEnumerable<UserDto> Administrators { get; set; }
 }

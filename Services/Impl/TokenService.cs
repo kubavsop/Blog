@@ -53,10 +53,12 @@ public class TokenService: ITokenService
         var user = await _context.Users
             .Include(user => user.LikedPosts)
             .FirstOrDefaultAsync(u => u.Id == id);
+        
         if (user == null)
         {
             throw new UserNotFoundException("User not found");
         }
+        
         return user;
     }
     

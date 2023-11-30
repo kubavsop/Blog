@@ -8,8 +8,6 @@ public class CreateCommunityDto
     [MinLength(1)]
     public string Name { get; set; }
     
-    [Required]
-    [MinLength(1)]
     public string Description { get; set; }
     
     [Required]

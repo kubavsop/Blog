@@ -8,6 +8,27 @@ namespace Blog.API.Common.Mappers;
 internal static class CommunityMapper
 {
 
+    public static RoleResponseDto RoleResponseToRoleResponseDto(RoleResponse response)
+    {
+        return new RoleResponseDto
+        {
+            Role = response.Role
+        };
+    }
+    public static CommunityFullDto CommunityFullToCommunityFullDto(CommunityFull community)
+    {
+        return new CommunityFullDto
+        {
+            Id = community.Id,
+            CreateTime = community.CreateTime,
+            Name = community.Name,
+            Description = community.Description,
+            IsClosed = community.IsClosed,
+            SubscribersCount = community.SubscribersCount,
+            Administrators = UserMapper.UsersToUsersDto(community.Administrators)
+        };
+    }
+
     public static Community CreateCommunityDtoToCreateCommunity(CreateCommunityDto communityDto)
     {
         return new Community
@@ -47,7 +68,7 @@ internal static class CommunityMapper
             Name = community.Name,
             Description = community.Description,
             IsClosed = community.IsClosed,
-            subscribersCount = community.SubscribersCount
+            SubscribersCount = community.SubscribersCount
         };
     }
 }

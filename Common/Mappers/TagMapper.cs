@@ -6,11 +6,11 @@ namespace Blog.API.Common.Mappers;
 
 internal static class TagMapper
 {
-    public static Tag CreateTagDtoToTag(CreateTag createTag)
+    public static Tag CreateTagDtoToTag(CreateTagDto createTagDto)
     {
         return new Tag
         {
-            Name = createTag.Name
+            Name = createTagDto.Name
         };
     }
     
