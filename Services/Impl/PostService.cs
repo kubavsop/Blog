@@ -25,6 +25,7 @@ public class PostService: IPostService
             Description = createPost.Description,
             ReadingTime = createPost.ReadingTime,
             Image = createPost.Image,
+            AddressId = createPost.AddressId
         };
         
         var user = await _tokenService.GetUserAsync();

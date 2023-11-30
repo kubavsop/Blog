@@ -1,10 +1,22 @@
-﻿using Blog.API.Controllers.Dto.Responses;
+﻿using Blog.API.Controllers.Dto.Requests;
+using Blog.API.Controllers.Dto.Responses;
+using Blog.API.Entities;
 using Blog.API.Entities.Database;
 
 namespace Blog.API.Common.Mappers;
 
 internal static class CommunityMapper
 {
+
+    public static Community CreateCommunityDtoToCreateCommunity(CreateCommunityDto communityDto)
+    {
+        return new Community
+        {
+            Name = communityDto.Name,
+            Description = communityDto.Description,
+            IsClosed = communityDto.IsClosed
+        };
+    }
     public static IEnumerable<CommunityUserDto> CommunitiesUserToCommunitiesUserDto(
         IEnumerable<CommunityUser> communities)
     {

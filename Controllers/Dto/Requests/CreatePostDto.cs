@@ -18,7 +18,7 @@ public class CreatePostDto
     [Url]
     public string? Image { get; set; }
     
-    public Guid? AddresId { get; set; }
+    public Guid? AddressId { get; set; }
     
     [Required]
     [MinLength(1)]

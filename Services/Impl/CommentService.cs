@@ -103,7 +103,7 @@ public class CommentService : ICommentService
     {
         var stack = new Stack<Comment>();
 
-        await GetSubComments(stack, rootComment);
+        await GetSubCommentsAsync(stack, rootComment);
 
         while (stack.Count > 0)
         {
@@ -111,13 +111,12 @@ public class CommentService : ICommentService
             
             comments.Add(currentComment);
 
-            await GetSubComments(stack, currentComment);
+            await GetSubCommentsAsync(stack, currentComment);
         }
     }
  
-    private async Task GetSubComments(Stack<Comment> stack, Comment comment)
+    private async Task GetSubCommentsAsync(Stack<Comment> stack, Comment comment)
     {
-        
         var subComments = await _context.Comments
             .Include(c => c.Author)
             .Where(c => c.ParentId == comment.Id)

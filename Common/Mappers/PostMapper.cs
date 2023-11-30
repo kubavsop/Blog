@@ -22,6 +22,7 @@ internal static class PostMapper
             Description = createPostDto.Description,
             ReadingTime = createPostDto.ReadingTime,
             Image = createPostDto.Image,
+            AddressId = createPostDto.AddressId,
             Tags = createPostDto.Tags
         };
     }

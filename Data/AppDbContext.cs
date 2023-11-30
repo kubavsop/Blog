@@ -58,5 +58,11 @@ public class AppDbContext : DbContext
             .HasMany(c => c.Subscribers)
             .WithMany(u => u.Communities)
             .UsingEntity<CommunityUser>();
+
+        builder.Entity<Post>()
+            .HasOne(p => p.Address)
+            .WithMany()
+            .HasForeignKey(p => p.AddressId)
+            .HasPrincipalKey(a => a.ObjectGuid);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Blog.API.Data;
+﻿using Blog.API.Common.Exceptions;
+using Blog.API.Data;
 using Blog.API.Entities.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,5 +17,20 @@ public class TagService: ITagService
     public async Task<IEnumerable<Tag>> GetTagsAsync()
     {
         return await _context.Tags.ToListAsync();
+    }
+
+    public async Task CreateTagAsync(Tag tag)
+    {
+        await CheckNameExistenceAsync(tag.Name);
+        await _context.Tags.AddAsync(tag);
+        await _context.SaveChangesAsync();
+    }
+    
+    private async Task CheckNameExistenceAsync(string name)
+    {
+        if (await _context.Tags.AnyAsync(t => t.Name == name))
+        {
+            throw new TagAlreadyExistsException("Tag with this name already exists");
+        }
     }
 }

@@ -3,7 +3,6 @@ using System;
 using Blog.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,11 +11,9 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Blog.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231130034122_ChangeName")]
-    partial class ChangeName
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,6 +164,9 @@ namespace Blog.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("AddressId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
@@ -197,6 +197,8 @@ namespace Blog.API.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AddressId");
 
                     b.HasIndex("AuthorId");
 
@@ -334,6 +336,11 @@ namespace Blog.API.Migrations
 
             modelBuilder.Entity("Blog.API.Entities.Database.Post", b =>
                 {
+                    b.HasOne("Blog.API.Entities.Database.AddressElement", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .HasPrincipalKey("ObjectGuid");
+
                     b.HasOne("Blog.API.Entities.Database.User", "Author")
                         .WithMany("CreatedPosts")
                         .HasForeignKey("AuthorId")
@@ -343,6 +350,8 @@ namespace Blog.API.Migrations
                     b.HasOne("Blog.API.Entities.Database.Community", "Community")
                         .WithMany()
                         .HasForeignKey("CommunityId");
+
+                    b.Navigation("Address");
 
                     b.Navigation("Author");
 
