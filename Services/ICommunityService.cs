@@ -5,4 +5,6 @@ namespace Blog.API.Services;
 public interface ICommunityService
 {
     Task<IEnumerable<Community>> GetCommunityListAsync();
+
+    Task<IEnumerable<CommunityUser>> GetUserCommunities();
 }

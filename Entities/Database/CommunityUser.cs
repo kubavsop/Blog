@@ -2,7 +2,7 @@
 
 namespace Blog.API.Entities.Database;
 
-public class UserCommunity
+public class CommunityUser
 {
     public Guid UserId { get; set; }
     public Guid CommunityId { get; set; }

@@ -20,7 +20,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Community> Communities { get; set; }
 
-    public DbSet<UserCommunity> UserCommunity { get; set; }
+    public DbSet<CommunityUser> CommunityUser { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -51,12 +51,12 @@ public class AppDbContext : DbContext
         builder.Entity<AddressElement>()
             .HasKey(a => a.ObjectId);
 
-        builder.Entity<UserCommunity>()
+        builder.Entity<CommunityUser>()
             .HasKey(userCommunity => new { userCommunity.UserId, userCommunity.CommunityId });
 
         builder.Entity<Community>()
             .HasMany(c => c.Subscribers)
             .WithMany(u => u.Communities)
-            .UsingEntity<UserCommunity>();
+            .UsingEntity<CommunityUser>();
     }
 }

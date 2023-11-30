@@ -129,6 +129,24 @@ namespace Blog.API.Migrations
                     b.ToTable("Communities");
                 });
 
+            modelBuilder.Entity("Blog.API.Entities.Database.CommunityUser", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CommunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "CommunityId");
+
+                    b.HasIndex("CommunityId");
+
+                    b.ToTable("CommunityUser");
+                });
+
             modelBuilder.Entity("Blog.API.Entities.Database.InvalidTokens", b =>
                 {
                     b.Property<Guid>("Id")
@@ -243,24 +261,6 @@ namespace Blog.API.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Blog.API.Entities.Database.UserCommunity", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CommunityId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
-
-                    b.HasKey("UserId", "CommunityId");
-
-                    b.HasIndex("CommunityId");
-
-                    b.ToTable("UserCommunity");
-                });
-
             modelBuilder.Entity("PostTag", b =>
                 {
                     b.Property<Guid>("PostsId")
@@ -310,24 +310,7 @@ namespace Blog.API.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("Blog.API.Entities.Database.Post", b =>
-                {
-                    b.HasOne("Blog.API.Entities.Database.User", "Author")
-                        .WithMany("CreatedPosts")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Blog.API.Entities.Database.Community", "Community")
-                        .WithMany()
-                        .HasForeignKey("CommunityId");
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Community");
-                });
-
-            modelBuilder.Entity("Blog.API.Entities.Database.UserCommunity", b =>
+            modelBuilder.Entity("Blog.API.Entities.Database.CommunityUser", b =>
                 {
                     b.HasOne("Blog.API.Entities.Database.Community", "Community")
                         .WithMany()
@@ -344,6 +327,23 @@ namespace Blog.API.Migrations
                     b.Navigation("Community");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Blog.API.Entities.Database.Post", b =>
+                {
+                    b.HasOne("Blog.API.Entities.Database.User", "Author")
+                        .WithMany("CreatedPosts")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Blog.API.Entities.Database.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Community");
                 });
 
             modelBuilder.Entity("PostTag", b =>
