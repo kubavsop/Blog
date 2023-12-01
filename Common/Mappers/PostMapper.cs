@@ -1,11 +1,35 @@
 ﻿using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Entities;
+using Blog.API.Entities.Database;
 
 namespace Blog.API.Common.Mappers;
 
 internal static class PostMapper
 {
+
+    public static PostFullDto PostFullToPostFullDto(PostFull post)
+    {
+        return new PostFullDto
+        {
+            Id = post.Id,
+            CreateTime = post.CreateTime,
+            Title = post.Title,
+            Description = post.Description,
+            ReadingTime = post.ReadingTime,
+            Image = post.Image,
+            AuthorId = post.AuthorId,
+            Author = post.Author,
+            CommunityId = post.CommunityId,
+            CommunityName = post.CommunityName,
+            AddressId = post.AddressId,
+            Likes = post.Likes,
+            HasLike = post.HasLike,
+            CommentsCount = post.CommentsCount,
+            Tags = TagMapper.TagsToTagsDto(post.Tags),
+            Comments = CommentMapper.CommentsToCommentsDto(post.Comments)
+        };
+    }
     public static PostResponseDto PostResponseToPostResponseDto(PostResponse postResponse)
     {
         return new PostResponseDto

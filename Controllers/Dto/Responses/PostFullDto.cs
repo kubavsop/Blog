@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using Blog.API.Controllers.Dto.CustomValidationAttributes;
 
 namespace Blog.API.Controllers.Dto.Responses;
 
-public class PostDto
+public class PostFullDto
 {
     [Required]
     public Guid Id { get; set; }
@@ -24,7 +24,7 @@ public class PostDto
     [Required]
     public int ReadingTime { get; set; }
     
-    public string Image { get; set; }
+    public string? Image { get; set; }
     
     [Required]
     public Guid AuthorId { get; set; }
@@ -33,11 +33,11 @@ public class PostDto
     [MinLength(1)]
     public string Author { get; set; }
     
-    public Guid CommunityId { get; set; }
+    public Guid? CommunityId { get; set; }
     
-    public string CommunityName { get; set; }
+    public string? CommunityName { get; set; }
     
-    public string AddressId { get; set; }
+    public Guid? AddressId { get; set; }
     
     [Required]
     [DefaultValue(0)]
@@ -53,4 +53,7 @@ public class PostDto
 
     [Required]
     public IEnumerable<TagDto> Tags { get; set; }
+    
+    [Required]
+    public IEnumerable<CommentDto> Comments { get; set; }
 }

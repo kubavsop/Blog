@@ -26,6 +26,14 @@ public class PostController: ControllerBase
         return Ok(PostMapper.PostResponseToPostResponseDto(postResponse));
     }
 
+    [AllowAnonymous]
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<PostFullDto>> GetInformationAboutPostAsync(Guid id)
+    {
+        var post = await _postService.GetInformationAboutPost(id);
+        return Ok(PostMapper.PostFullToPostFullDto(post));
+    }
+
     [HttpPost("{postId:guid}/like")]
     public async Task<ActionResult> LikePostAsync(Guid postId)
     {

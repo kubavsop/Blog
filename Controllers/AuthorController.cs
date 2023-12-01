@@ -17,7 +17,7 @@ public class AuthorController: ControllerBase
         _authorService = authorService;
     }
 
-
+    
     [HttpGet("list")]
     public async Task<ActionResult<IEnumerable<AuthorDto>>> GetAuthorsAsync()
     {

@@ -81,6 +81,10 @@ public class ExceptionHandlingMiddleware
         {
             await SetExceptionAsync(context, StatusCodes.Status403Forbidden, exception.Message);
         }
+        catch (UserNotAuthorizedException exception)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        }
         catch (Exception exception)
         {
             await SetExceptionAsync(context, StatusCodes.Status500InternalServerError, exception.Message);

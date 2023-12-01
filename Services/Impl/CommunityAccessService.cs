@@ -20,8 +20,11 @@ public class CommunityAccessService : ICommunityAccessService
     {
         if (communityId == null) return;
 
-        var userId = _tokenService.GetUserId();
         var community = await GetCommunityAsync(communityId.GetValueOrDefault());
+
+        if (!community.IsClosed) return;
+
+        var userId = _tokenService.GetUserId();
 
         if (community.IsClosed &&
             !await _context.CommunityUser.AnyAsync(cu => cu.CommunityId == communityId && cu.UserId == userId))
@@ -42,8 +45,7 @@ public class CommunityAccessService : ICommunityAccessService
 
         await CheckCommunityById(post.CommunityId);
     }
-    
-    
+
 
     public async Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId)
     {
