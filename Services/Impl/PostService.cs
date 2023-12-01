@@ -19,12 +19,6 @@ public class PostService: IPostService
 
     public async Task<PostResponse> CreatePostAsync(CreatePost createPost)
     {
-        
-        if (createPost.AddressId != null)
-        {
-            await CheckAddressExistence(createPost.AddressId.GetValueOrDefault());
-        }
-        
         var post = new Post
         {
             Title = createPost.Title,
@@ -36,7 +30,7 @@ public class PostService: IPostService
         
         var user = await _tokenService.GetUserAsync();
 
-        var tags = await GetTags(createPost.Tags);
+        var tags = await GetTags(createPost.Tags.Distinct());
         user.CreatedPosts.Add(post);
         post.Tags = tags;
         
@@ -63,14 +57,6 @@ public class PostService: IPostService
         ChangeLikeCounter(false, postToRemove);
         user.LikedPosts.Remove(postToRemove);
         await _context.SaveChangesAsync();
-    }
-
-    private async Task CheckAddressExistence(Guid addressId)
-    {
-        if (!await _context.AddressElements.AnyAsync(a => a.ObjectGuid == addressId))
-        {
-            throw new AddressNotFoundException($"Not found address with ObjectGuid={addressId}");
-        }
     }
 
     private void ChangeLikeCounter(bool isLike, Post post)

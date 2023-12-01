@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Blog.API.Controllers.Dto.CustomValidationAttributes;
+using Blog.API.Data;
 
 namespace Blog.API.Controllers.Dto.Requests;
 
@@ -18,6 +20,7 @@ public class CreatePostDto
     [Url]
     public string? Image { get; set; }
     
+    [Address]
     public Guid? AddressId { get; set; }
     
     [Required]
