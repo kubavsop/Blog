@@ -9,6 +9,7 @@ public interface ICommunityService
 
     Task<IEnumerable<CommunityUser>> GetUserCommunitiesAsync();
     Task<RoleResponse> GetUserRoleAsync(Guid communityId);
+    Task<PostResponse> CreatePostAsync(CreatePost createPost, Guid communityId);
     Task SubscribeUserToCommunityAsync(Guid communityId);
     Task UnsubscribeUserToCommunityAsync(Guid communityId);
     Task<CommunityFull> GetInformationAboutCommunityAsync(Guid id);

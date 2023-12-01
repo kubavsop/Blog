@@ -11,11 +11,13 @@ public class CommunityService : ICommunityService
 {
     private readonly ITokenService _tokenService;
     private readonly AppDbContext _context;
+    private readonly ICommunityAccessService _communityAccess;
 
-    public CommunityService(AppDbContext context, ITokenService tokenService)
+    public CommunityService(AppDbContext context, ITokenService tokenService, ICommunityAccessService communityAccess)
     {
         _context = context;
         _tokenService = tokenService;
+        _communityAccess = communityAccess;
     }
 
     public async Task<IEnumerable<Community>> GetCommunityListAsync()
@@ -31,7 +33,7 @@ public class CommunityService : ICommunityService
 
     public async Task<RoleResponse> GetUserRoleAsync(Guid communityId)
     {
-        await GetCommunityAsync(communityId);
+        await _communityAccess.GetCommunityAsync(communityId);
 
         var userId = _tokenService.GetUserId();
         var communityUser = await _context.CommunityUser.FirstOrDefaultAsync(cu =>
@@ -43,9 +45,39 @@ public class CommunityService : ICommunityService
         };
     }
 
+    public async Task<PostResponse> CreatePostAsync(CreatePost createPost, Guid communityId)
+    {
+        var tags = await _communityAccess.GetTags(createPost.Tags.Distinct());
+        var community = await _communityAccess.GetCommunityAsync(communityId);
+        var userId = _tokenService.GetUserId();
+
+        if (!await _context.CommunityUser.AnyAsync(cu =>
+                cu.CommunityId == communityId && cu.UserId == userId && cu.Role == CommunityRole.Administrator))
+        {
+            throw new CommunityAccessException(
+                $"User Id={userId} is not able to post in community Id={communityId}");
+        }
+
+        var post = new Post
+        {
+            Title = createPost.Title,
+            Description = createPost.Description,
+            ReadingTime = createPost.ReadingTime,
+            Image = createPost.Image,
+            AddressId = createPost.AddressId,
+            Community = community,
+            Tags = tags,
+            AuthorId = userId
+        };
+
+        await _context.Posts.AddAsync(post);
+        await _context.SaveChangesAsync();
+        return new PostResponse { PostId = post.Id };
+    }
+
     public async Task SubscribeUserToCommunityAsync(Guid communityId)
     {
-        var community = await GetCommunityAsync(communityId);
+        var community = await _communityAccess.GetCommunityAsync(communityId);
         var userId = _tokenService.GetUserId();
         var communityUser =
             await _context.CommunityUser.FirstOrDefaultAsync(cu =>
@@ -70,7 +102,7 @@ public class CommunityService : ICommunityService
 
     public async Task UnsubscribeUserToCommunityAsync(Guid communityId)
     {
-        var community = await GetCommunityAsync(communityId);
+        var community = await _communityAccess.GetCommunityAsync(communityId);
         var userId = _tokenService.GetUserId();
         var communityUser =
             await _context.CommunityUser.FirstOrDefaultAsync(cu =>
@@ -96,7 +128,7 @@ public class CommunityService : ICommunityService
 
     public async Task<CommunityFull> GetInformationAboutCommunityAsync(Guid id)
     {
-        var community = await GetCommunityAsync(id);
+        var community = await _communityAccess.GetCommunityAsync(id);
         var adminUsers = await GetAdminUsersAsync(id);
 
         return new CommunityFull
@@ -127,19 +159,7 @@ public class CommunityService : ICommunityService
 
         await _context.SaveChangesAsync();
     }
-
-    private async Task<Community> GetCommunityAsync(Guid communityId)
-    {
-        var community = await _context.Communities.FirstOrDefaultAsync(c => c.Id == communityId);
-
-        if (community == null)
-        {
-            throw new CommunityNotFoundException($"Community with id={communityId} not found in  database");
-        }
-
-        return community;
-    }
-
+    
     private async Task<IEnumerable<User>> GetAdminUsersAsync(Guid communityId)
     {
         var adminUsers = await _context.CommunityUser

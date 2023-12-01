@@ -10,11 +10,13 @@ public class PostService: IPostService
 {
     private readonly ITokenService _tokenService;
     private readonly AppDbContext _context;
+    private readonly ICommunityAccessService _communityAccess;
 
-    public PostService(ITokenService tokenService, AppDbContext context)
+    public PostService(ITokenService tokenService, AppDbContext context, ICommunityAccessService communityAccess)
     {
         _tokenService = tokenService;
         _context = context;
+        _communityAccess = communityAccess;
     }
 
     public async Task<PostResponse> CreatePostAsync(CreatePost createPost)
@@ -25,14 +27,10 @@ public class PostService: IPostService
             Description = createPost.Description,
             ReadingTime = createPost.ReadingTime,
             Image = createPost.Image,
-            AddressId = createPost.AddressId
+            AddressId = createPost.AddressId,
+            Tags = await _communityAccess.GetTags(createPost.Tags.Distinct()),
+            AuthorId = _tokenService.GetUserId()
         };
-        
-        var user = await _tokenService.GetUserAsync();
-
-        var tags = await GetTags(createPost.Tags.Distinct());
-        user.CreatedPosts.Add(post);
-        post.Tags = tags;
         
         await _context.Posts.AddAsync(post);
         await _context.SaveChangesAsync();
@@ -41,9 +39,10 @@ public class PostService: IPostService
 
     public async Task LikePostAsync(Guid id)
     {
+        await _communityAccess.CheckCommunityByPost(id);
+        var post = await GetPostByIdAsync(id);
         var user = await _tokenService.GetUserWithLikedPostsAsync();
         EnsureNoLikeExists(user, id);
-        var post = await GetPostByIdAsync(id);
         ChangeLikeCounter(true, post);
         user.LikedPosts.Add(post);
         await _context.SaveChangesAsync();
@@ -51,9 +50,10 @@ public class PostService: IPostService
 
     public async Task UnlikePostAsync(Guid id)
     {
+        await _communityAccess.CheckCommunityByPost(id);
+        var postToRemove = await GetPostByIdAsync(id);
         var user = await _tokenService.GetUserWithLikedPostsAsync();
         EnsureLikeExists(user, id);
-        var postToRemove = await GetPostByIdAsync(id);
         ChangeLikeCounter(false, postToRemove);
         user.LikedPosts.Remove(postToRemove);
         await _context.SaveChangesAsync();
@@ -92,21 +92,5 @@ public class PostService: IPostService
             throw new PostNotFoundException($"Post with id={id} not found in database");
         }
         return post;
-    }
-    
-    private async Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId)
-    {
-        var tagsIdList = tagsId.ToList();
-        
-        var tags = await _context.Tags
-            .Where(t => tagsIdList.Contains(t.Id))
-            .ToListAsync();
-        
-        if (tags.Count != tagsIdList.Count)
-        {
-            throw new TagNotFoundException("Tag not found");
-        }
-
-        return tags;
     }
 }

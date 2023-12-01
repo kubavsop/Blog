@@ -77,6 +77,10 @@ public class ExceptionHandlingMiddleware
         {
             await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
         }
+        catch (CommunityAccessException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status403Forbidden, exception.Message);
+        }
         catch (Exception exception)
         {
             await SetExceptionAsync(context, StatusCodes.Status500InternalServerError, exception.Message);
@@ -88,14 +92,14 @@ public class ExceptionHandlingMiddleware
         context.Response.StatusCode = status;
         await context.Response.WriteAsJsonAsync(new Error
         {
-            StatusCode = "Error",
+            Status = "Error",
             Message = message
         });
     }
 
     private class Error
     {
-        public string StatusCode { get; set; }
+        public string Status { get; set; }
         public string Message { get; set; }
     }
 }

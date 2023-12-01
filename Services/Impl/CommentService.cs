@@ -10,11 +10,13 @@ public class CommentService : ICommentService
 {
     private readonly AppDbContext _context;
     private readonly ITokenService _tokenService;
+    private readonly ICommunityAccessService _communityAccess;
 
-    public CommentService(AppDbContext context, ITokenService tokenService)
+    public CommentService(AppDbContext context, ITokenService tokenService, ICommunityAccessService communityAccess)
     {
         _context = context;
         _tokenService = tokenService;
+        _communityAccess = communityAccess;
     }
 
     public async Task<IEnumerable<Comment>> GetCommentsAsync(Guid commentId)
@@ -35,9 +37,11 @@ public class CommentService : ICommentService
 
     public async Task AddCommentAsync(CreateComment comment, Guid postId)
     {
-        // TODO Community work
-        var user = await _tokenService.GetUserAsync();
         var post = await GetPostByIdAsyncWithCheck(postId, comment.ParentId);
+        
+        await _communityAccess.CheckCommunityById(post.CommunityId);
+        
+        var user = await _tokenService.GetUserAsync();
         var newComment = new Comment
         {
             ParentId = comment.ParentId,
@@ -55,6 +59,8 @@ public class CommentService : ICommentService
     {
         var comment = await GetCommentAsync(commentId);
 
+        await _communityAccess.CheckCommunityByPost(comment.PostId);
+        
         if (comment.DeleteDate != null)
         {
             throw new CommentDeletionException($"Comment with id={commentId} is deleted");
@@ -72,6 +78,7 @@ public class CommentService : ICommentService
     {
         var comment = await GetCommentAsync(commentId);
         
+        await _communityAccess.CheckCommunityByPost(comment.PostId);
         CheckAuthor(comment.AuthorId);
 
         if (comment.DeleteDate != null)

@@ -1,7 +1,6 @@
 ﻿using Blog.API.Common.Mappers;
 using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Controllers.Dto.Responses;
-using Blog.API.Entities;
 using Blog.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +47,14 @@ public class CommunityController : ControllerBase
     {
         var community = await _communityService.GetInformationAboutCommunityAsync(id);
         return Ok(CommunityMapper.CommunityFullToCommunityFullDto(community));
+    }
+    
+    [Authorize]
+    [HttpPost("{id:guid}/post")]
+    public async Task<ActionResult<PostResponseDto>> CreatePostAsync([FromBody] CreatePostDto createPostDto, Guid id)
+    {
+        var postResponse = await _communityService.CreatePostAsync(PostMapper.CreatePostDtoToCreatePost(createPostDto), id);
+        return Ok(PostMapper.PostResponseToPostResponseDto(postResponse));
     }
 
     [Authorize]

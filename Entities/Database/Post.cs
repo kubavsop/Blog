@@ -15,6 +15,8 @@ public class Post
     public Guid? AddressId { get; set; }
     
     public Guid? CommunityId { get; set; }
+    
+    public Guid AuthorId { get; set; }
     public AddressElement Address { get; set; }
     
     public Community Community { get; set; }
