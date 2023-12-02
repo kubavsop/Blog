@@ -85,6 +85,10 @@ public class ExceptionHandlingMiddleware
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
+        catch (InvalidPageException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+        }
         catch (Exception exception)
         {
             await SetExceptionAsync(context, StatusCodes.Status500InternalServerError, exception.Message);

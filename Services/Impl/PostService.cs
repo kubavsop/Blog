@@ -1,7 +1,9 @@
-﻿using Blog.API.Common.Exceptions;
+﻿using Blog.API.Common.Enums;
+using Blog.API.Common.Exceptions;
 using Blog.API.Data;
 using Blog.API.Entities;
 using Blog.API.Entities.Database;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.API.Services.Impl;
@@ -17,6 +19,73 @@ public class PostService : IPostService
         _tokenService = tokenService;
         _context = context;
         _communityAccess = communityAccess;
+    }
+
+    public async Task<PostPagedList> GetPostsAsync(IEnumerable<Guid> tagsId, string? author, int? min,
+        int? max, PostSorting sorting, bool onlyMyCommunities, int page, int size)
+    {
+        tagsId = tagsId.Distinct().ToList();
+
+        await _communityAccess.GetTags(tagsId);
+
+        var queryable = GetInitialPosts(onlyMyCommunities)
+            .Where(p => !tagsId.Any() || p.Tags.Any(t => tagsId.Contains(t.Id)))
+            .Where(p => author == null || p.Author.FullName.ToLower().Contains(author.ToLower()))
+            .Where(p => (min == null || p.ReadingTime >= min) && (max == null || p.ReadingTime <= max));
+
+        var sortedQueryable = sorting switch
+        {
+            PostSorting.CreateDesc => queryable.OrderByDescending(p => p.CreateTime),
+            PostSorting.CreateAsc => queryable.OrderBy(p => p.CreateTime),
+            PostSorting.LikeAsc => queryable.OrderBy(p => p.Likes),
+            PostSorting.LikeDesc => queryable.OrderByDescending(p => p.Likes),
+            _ => throw new ArgumentOutOfRangeException(nameof(sorting), sorting, null)
+        };
+
+        var result = await sortedQueryable
+            .Skip((page - 1) * size)
+            .Take(size)
+            .Select(post => new PostInformation
+            {
+                Id = post.Id,
+                CreateTime = post.CreateTime,
+                Title = post.Title,
+                Description = post.Description,
+                ReadingTime = post.ReadingTime,
+                Image = post.Image,
+                AuthorId = post.AuthorId,
+                Author = post.Author.FullName,
+                CommunityId = post.CommunityId,
+                CommunityName = post.Community != null ? post.Community.Name : null,
+                AddressId = post.AddressId,
+                Likes = post.Likes,
+                CommentsCount = post.CommentsCount,
+                Tags = post.Tags
+            })
+            .ToListAsync();
+
+        if (result.Count == 0 && page != 1)
+        {
+            throw new InvalidPageException("Invalid value for attribute page");
+        }
+
+        foreach (var post in result)
+        {
+            post.HasLike = await HasUserLikedPost(post.Id);
+        }
+        
+        var count = await queryable.CountAsync();
+
+        return new PostPagedList
+        {
+            Posts = result,
+            Pagination = new PageInfo
+            {
+                Count = (int)Math.Ceiling((double)count / size),
+                Current = page,
+                Size = size
+            }
+        };
     }
 
     public async Task<PostResponse> CreatePostAsync(CreatePost createPost)
@@ -37,13 +106,13 @@ public class PostService : IPostService
         return new PostResponse { PostId = post.Id };
     }
 
-    public async Task<PostFull> GetInformationAboutPost(Guid postId)
+    public async Task<PostInformation> GetInformationAboutPost(Guid postId)
     {
         var post = await GetFullPostById(postId);
 
         await _communityAccess.CheckCommunityById(post.CommunityId);
 
-        return new PostFull
+        return new PostInformation
         {
             Id = post.Id,
             CreateTime = post.CreateTime,
@@ -88,6 +157,38 @@ public class PostService : IPostService
         ChangeLikeCounter(false, postToRemove);
         user.LikedPosts.Remove(postToRemove);
         await _context.SaveChangesAsync();
+    }
+
+    private IQueryable<Post> GetInitialPosts(bool onlyMyCommunities)
+    {
+        if (!_tokenService.IsAuthenticated())
+        {
+            var publicCommunities = _context.Communities
+                .Where(c => c.IsClosed == false)
+                .Select(c => c.Id);
+
+            return _context.Posts
+                .Where(p => p.CommunityId == null || publicCommunities.Contains(p.CommunityId ?? Guid.Empty));
+        }
+
+        var userId = _tokenService.GetUserId();
+
+        var myCommunities = _context.CommunityUser
+            .Where(cu => cu.UserId == userId)
+            .Select(cu => cu.CommunityId);
+
+        if (onlyMyCommunities)
+        {
+            return _context.Posts.Where(p =>
+                p.CommunityId != null && myCommunities.Contains(p.CommunityId ?? Guid.Empty));
+        }
+
+        var communities = _context.Communities
+            .Where(c => c.IsClosed == false || myCommunities.Contains(c.Id))
+            .Select(c => c.Id);
+
+        return _context.Posts
+            .Where(p => p.CommunityId == null || communities.Contains(p.CommunityId ?? Guid.Empty));
     }
 
     private async Task<bool> HasUserLikedPost(Guid postId)

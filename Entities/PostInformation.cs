@@ -3,7 +3,7 @@ using Blog.API.Entities.Database;
 
 namespace Blog.API.Entities;
 
-public class PostFull
+public class PostInformation
 {
     public Guid Id { get; set; }
     
@@ -32,8 +32,8 @@ public class PostFull
     public bool HasLike { get; set; }
     
     public int CommentsCount { get; set; }
-    
-    public IEnumerable<Tag> Tags { get; set; }
-    
-    public IEnumerable<Comment> Comments { get; set; }
+
+    public IEnumerable<Tag> Tags { get; set; } = new List<Tag>();
+
+    public IEnumerable<Comment> Comments { get; set; } = new List<Comment>();
 }

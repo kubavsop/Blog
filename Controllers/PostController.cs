@@ -1,4 +1,7 @@
-﻿using Blog.API.Common.Mappers;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices.JavaScript;
+using Blog.API.Common.Enums;
+using Blog.API.Common.Mappers;
 using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Services;
@@ -10,13 +13,31 @@ namespace Blog.API.Controllers;
 [Authorize]
 [Route("api/post")]
 [ApiController]
-public class PostController: ControllerBase
+public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
 
     public PostController(IPostService postService)
     {
         _postService = postService;
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<PostDto>>> GetPostsAsync(
+        [FromQuery] IEnumerable<Guid> tags,
+        string? author,
+        [Range(0, int.MaxValue)] int? min,
+        [Range(0, int.MaxValue)] int? max,
+        PostSorting sorting,
+        bool onlyMyCommunities = false,
+        [Range(1, int.MaxValue)] int page = 1,
+        [Range(1, int.MaxValue)] int size = 5
+    )
+    {
+        var pagedList =
+            await _postService.GetPostsAsync(tags, author, min, max, sorting, onlyMyCommunities, page, size);
+        return Ok(PostMapper.PagedListPagedListDto(pagedList));
     }
 
     [HttpPost]

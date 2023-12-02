@@ -1,4 +1,6 @@
-﻿using Blog.API.Common.Mappers;
+﻿using System.ComponentModel.DataAnnotations;
+using Blog.API.Common.Enums;
+using Blog.API.Common.Mappers;
 using Blog.API.Controllers.Dto.Requests;
 using Blog.API.Controllers.Dto.Responses;
 using Blog.API.Services;
@@ -49,11 +51,25 @@ public class CommunityController : ControllerBase
         return Ok(CommunityMapper.CommunityFullToCommunityFullDto(community));
     }
     
+    [HttpGet("{id:guid}/post")]
+    public async Task<ActionResult<PostPagedListDto>> GetCommunityPosts(
+        Guid id,
+        [FromQuery] IEnumerable<Guid> tags, 
+        PostSorting sorting,
+        [Range(1, int.MaxValue)] int page = 1,
+        [Range(1, int.MaxValue)] int size = 5
+    )
+    {
+        var pageList = await _communityService.GetCommunitiesPosts(id, tags, sorting, page, size);
+        return Ok(PostMapper.PagedListPagedListDto(pageList));
+    }
+
     [Authorize]
     [HttpPost("{id:guid}/post")]
     public async Task<ActionResult<PostResponseDto>> CreatePostAsync([FromBody] CreatePostDto createPostDto, Guid id)
     {
-        var postResponse = await _communityService.CreatePostAsync(PostMapper.CreatePostDtoToCreatePost(createPostDto), id);
+        var postResponse =
+            await _communityService.CreatePostAsync(PostMapper.CreatePostDtoToCreatePost(createPostDto), id);
         return Ok(PostMapper.PostResponseToPostResponseDto(postResponse));
     }
 

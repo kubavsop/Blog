@@ -49,13 +49,12 @@ public class CommunityAccessService : ICommunityAccessService
 
     public async Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId)
     {
-        var tagsIdList = tagsId.ToList();
 
         var tags = await _context.Tags
-            .Where(t => tagsIdList.Contains(t.Id))
+            .Where(t => tagsId.Contains(t.Id))
             .ToListAsync();
 
-        if (tags.Count != tagsIdList.Count)
+        if (tags.Count != tagsId.Count())
         {
             throw new TagNotFoundException("Tag not found");
         }
