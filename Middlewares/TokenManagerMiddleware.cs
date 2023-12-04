@@ -19,7 +19,7 @@ public class TokenManagerMiddleware
         var hasAllowAnonymousAttribute = context.GetEndpoint()?.Metadata.GetMetadata<AllowAnonymousAttribute>() != null;
         
         if (hasAllowAnonymousAttribute || hasAuthorizeAttribute || !await tokenService.CheckTokenAsync())
-        {
+        { 
             await _next(context);
             return;
         }

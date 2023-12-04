@@ -19,6 +19,14 @@ public class CommunityController : ControllerBase
     {
         _communityService = communityService;
     }
+    [Authorize]
+    [HttpPost("{id:guid}/admin")]
+    public async Task<ActionResult> MakeUserAdminAsync(Guid id, [FromBody] AdminRequestDto adminRequestDto)
+    {
+        await _communityService.MakeUserAdminAsync(id, adminRequestDto.UserId);
+        return Ok();
+    }
+    
 
     [HttpGet]
     public async Task<ActionResult<CommunityDto>> GetCommunityListAsync()

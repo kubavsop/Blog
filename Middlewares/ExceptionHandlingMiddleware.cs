@@ -5,10 +5,12 @@ namespace Blog.API.Middlewares;
 public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -19,11 +21,12 @@ public class ExceptionHandlingMiddleware
         }
         catch (UserAlreadyExistsException exception)
         {
+            _logger.LogError(exception, exception.Message);
             await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
         }
         catch (UserNotFoundException exception)
         {
-            await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+            await SetExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
         }
         catch (TagNotFoundException exception)
         {
@@ -86,6 +89,14 @@ public class ExceptionHandlingMiddleware
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
         }
         catch (InvalidPageException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+        }
+        catch (NotAdminException exception)
+        {
+            await SetExceptionAsync(context, StatusCodes.Status403Forbidden, exception.Message);
+        }
+        catch (InvalidCredentialsException exception)
         {
             await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
         }

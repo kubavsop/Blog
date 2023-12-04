@@ -6,14 +6,19 @@ using Blog.API.Services.Impl;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using NLog.Web;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 builder.Services.AddControllers();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ITokenProvider, TokenProvider>();
+builder.Services.AddSingleton<DatabaseMigrator>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -24,7 +29,11 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
 builder.Services.AddScoped<ICommunityAccessService, CommunityAccessService>();
 
-
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var connection = builder.Configuration.GetConnectionString("Redis");
+    options.Configuration = connection;
+});
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -49,12 +58,23 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+var dbContext = app.Services.CreateScope().ServiceProvider.GetService<AppDbContext>();
+var migrator = app.Services.GetRequiredService<DatabaseMigrator>();
+
+if (dbContext != null && dbContext.Database.GetPendingMigrations().Any())
+{
+    dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
+    migrator.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

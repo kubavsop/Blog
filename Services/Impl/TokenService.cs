@@ -1,9 +1,11 @@
-﻿using System.Security.Claims;
+﻿using System.Runtime.InteropServices.JavaScript;
+using System.Security.Claims;
 using Blog.API.Common.Exceptions;
 using Blog.API.Data;
 using Blog.API.Entities;
 using Blog.API.Entities.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Blog.API.Services.Impl;
 
@@ -11,18 +13,22 @@ public class TokenService: ITokenService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AppDbContext _context;
+    private readonly IDistributedCache _distributedCache;
 
-    public TokenService(IHttpContextAccessor accessor, AppDbContext context)
+    public TokenService(IHttpContextAccessor accessor, AppDbContext context, IDistributedCache distributedCache)
     {
         _httpContextAccessor = accessor;
         _context = context;
+        _distributedCache = distributedCache;
     }
 
     public async Task InvalidateTokenAsync()
     {
-        var tokenId = GetTokenId();
-        await _context.Tokens.AddAsync(new InvalidTokens { Id = tokenId });
-        await _context.SaveChangesAsync();
+        var options = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(DateTimeOffset.Now.AddSeconds(10));
+        
+        var tokenId = GetTokenId().ToString();
+        await _distributedCache.SetStringAsync(tokenId, "1", options);
     }
 
     public async Task<User> GetUserAsync()
@@ -33,8 +39,8 @@ public class TokenService: ITokenService
 
     public async Task<bool> CheckTokenAsync()
     {
-        var tokenId = GetTokenId();
-        return await _context.Tokens.AnyAsync(t => t.Id == tokenId);
+        var tokenId = GetTokenId().ToString();
+        return await _distributedCache.GetAsync(tokenId) != null;
     }
     
     private async Task<User> GetUserById(Guid id)

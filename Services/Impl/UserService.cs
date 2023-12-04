@@ -1,4 +1,5 @@
-﻿using Blog.API.Common.Exceptions;
+﻿using System.Security.Authentication;
+using Blog.API.Common.Exceptions;
 using Blog.API.Data;
 using Blog.API.Entities;
 using Blog.API.Entities.Database;
@@ -65,7 +66,7 @@ public class UserService : IUserService
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == credentials.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(credentials.Password, user.Password))
         {
-            throw new UserNotFoundException("Incorrect login or password");
+            throw new InvalidCredentialException("Incorrect login or password");
         }
 
         return user.Id;

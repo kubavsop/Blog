@@ -19,19 +19,20 @@ public class CommunityService : ICommunityService
         _tokenService = tokenService;
         _communityAccess = communityAccess;
     }
-    
-    public async Task<PostPagedList> GetCommunitiesPosts(Guid id, IEnumerable<Guid> tags, PostSorting sorting, int page, int size)
+
+    public async Task<PostPagedList> GetCommunitiesPosts(Guid id, IEnumerable<Guid> tags, PostSorting sorting, int page,
+        int size)
     {
         await _communityAccess.CheckCommunityById(id);
-        
+
         tags = tags.Distinct().ToList();
-        
+
         await _communityAccess.GetTags(tags);
 
         var queryable = _context.Posts
             .Where(p => p.CommunityId == id)
             .Where(p => !tags.Any() || p.Tags.Any(t => tags.Contains(t.Id)));
-        
+
         var sortedQueryable = sorting switch
         {
             PostSorting.CreateDesc => queryable.OrderByDescending(p => p.CreateTime),
@@ -40,7 +41,7 @@ public class CommunityService : ICommunityService
             PostSorting.LikeDesc => queryable.OrderByDescending(p => p.Likes),
             _ => throw new ArgumentOutOfRangeException(nameof(sorting), sorting, null)
         };
-        
+
         var result = await sortedQueryable
             .Skip((page - 1) * size)
             .Take(size)
@@ -72,7 +73,7 @@ public class CommunityService : ICommunityService
         {
             post.HasLike = await HasUserLikedPost(post.Id);
         }
-        
+
         var count = await queryable.CountAsync();
 
         return new PostPagedList
@@ -87,10 +88,40 @@ public class CommunityService : ICommunityService
         };
     }
 
-
     public async Task<IEnumerable<Community>> GetCommunityListAsync()
     {
         return await _context.Communities.ToListAsync();
+    }
+
+    public async Task MakeUserAdminAsync(Guid communityId, Guid userId)
+    {
+        if (!await _context.Communities.AnyAsync(c => c.Id == communityId))
+        {
+            throw new CommunityNotFoundException($"Community with id={communityId} not found in  database");
+        }
+
+        var adminId = _tokenService.GetUserId();
+        if (!await _context.CommunityUser.AnyAsync(cu =>
+                cu.CommunityId == communityId && cu.UserId == adminId && cu.Role == CommunityRole.Administrator))
+        {
+            throw new NotAdminException($"User with id={adminId} is not administrator community with id={communityId}");
+        }
+
+        if (!await _context.Users.AnyAsync(u => u.Id == userId))
+        {
+            throw new UserNotFoundException("User not found");
+        }
+
+        var communityUser = await GetCommunityUserAsync(userId, communityId);
+
+        if (communityUser.Role == CommunityRole.Administrator)
+        {
+            throw new UserRoleException($"User with id={userId} is already an administrator");
+        }
+
+        communityUser.Role = CommunityRole.Administrator;
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<CommunityUser>> GetUserCommunitiesAsync()
@@ -172,15 +203,7 @@ public class CommunityService : ICommunityService
     {
         var community = await _communityAccess.GetCommunityAsync(communityId);
         var userId = _tokenService.GetUserId();
-        var communityUser =
-            await _context.CommunityUser.FirstOrDefaultAsync(cu =>
-                cu.CommunityId == communityId && cu.UserId == userId);
-
-        if (communityUser == null)
-        {
-            throw new UserRoleException(
-                $"User with id={userId} not subscribed to the community with id={communityId}");
-        }
+        var communityUser = await GetCommunityUserAsync(userId, communityId);
 
         if (communityUser.Role == CommunityRole.Administrator)
         {
@@ -210,7 +233,7 @@ public class CommunityService : ICommunityService
             Administrators = adminUsers
         };
     }
-    
+
     public async Task CreateCommunityAsync(Community community)
     {
         await CheckNameExistenceAsync(community.Name);
@@ -227,7 +250,7 @@ public class CommunityService : ICommunityService
 
         await _context.SaveChangesAsync();
     }
-    
+
     private async Task<IEnumerable<User>> GetAdminUsersAsync(Guid communityId)
     {
         var adminUsers = await _context.CommunityUser
@@ -237,14 +260,29 @@ public class CommunityService : ICommunityService
 
         return adminUsers;
     }
-    
+
+    private async Task<CommunityUser> GetCommunityUserAsync(Guid userId, Guid communityId)
+    {
+        var communityUser =
+            await _context.CommunityUser.FirstOrDefaultAsync(cu =>
+                cu.CommunityId == communityId && cu.UserId == userId);
+
+        if (communityUser == null)
+        {
+            throw new UserRoleException(
+                $"User with id={userId} not subscribed to the community with id={communityId}");
+        }
+
+        return communityUser;
+    }
+
     private async Task<bool> HasUserLikedPost(Guid postId)
     {
         if (!_tokenService.IsAuthenticated()) return false;
         var user = await GetUserWithLikedPostsAsync();
         return user.LikedPosts.Any(p => p.Id == postId);
     }
-    
+
     private async Task<User> GetUserWithLikedPostsAsync()
     {
         var id = _tokenService.GetUserId();
