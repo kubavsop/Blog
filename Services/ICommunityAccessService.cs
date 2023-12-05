@@ -4,7 +4,6 @@ namespace Blog.API.Services;
 
 public interface ICommunityAccessService
 {
-    Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId);
     Task CheckCommunityById(Guid? communityId);
 
     Task CheckCommunityByPost(Guid postId);

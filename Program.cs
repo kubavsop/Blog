@@ -27,6 +27,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<ICommunityService, CommunityService>();
+builder.Services.AddScoped<ISortingToolsService, SortingToolsService>();
 builder.Services.AddScoped<ICommunityAccessService, CommunityAccessService>();
 
 builder.Services.AddStackExchangeRedisCache(options =>

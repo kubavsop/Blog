@@ -46,22 +46,6 @@ public class CommunityAccessService : ICommunityAccessService
         await CheckCommunityById(post.CommunityId);
     }
 
-
-    public async Task<List<Tag>> GetTags(IEnumerable<Guid> tagsId)
-    {
-
-        var tags = await _context.Tags
-            .Where(t => tagsId.Contains(t.Id))
-            .ToListAsync();
-
-        if (tags.Count != tagsId.Count())
-        {
-            throw new TagNotFoundException("Tag not found");
-        }
-
-        return tags;
-    }
-
     public async Task<Community> GetCommunityAsync(Guid communityId)
     {
         var community = await _context.Communities.FirstOrDefaultAsync(c => c.Id == communityId);

@@ -12,13 +12,15 @@ public class PostService : IPostService
 {
     private readonly ITokenService _tokenService;
     private readonly AppDbContext _context;
+    private readonly ISortingToolsService _sortingTools;
     private readonly ICommunityAccessService _communityAccess;
 
-    public PostService(ITokenService tokenService, AppDbContext context, ICommunityAccessService communityAccess)
+    public PostService(ITokenService tokenService, AppDbContext context, ICommunityAccessService communityAccess, ISortingToolsService sortingTools)
     {
         _tokenService = tokenService;
         _context = context;
         _communityAccess = communityAccess;
+        _sortingTools = sortingTools;
     }
 
     public async Task<PostPagedList> GetPostsAsync(IEnumerable<Guid> tagsId, string? author, int? min,
@@ -26,66 +28,14 @@ public class PostService : IPostService
     {
         tagsId = tagsId.Distinct().ToList();
 
-        await _communityAccess.GetTags(tagsId);
+        await _sortingTools.GetTagsAsync(tagsId);
 
         var queryable = GetInitialPosts(onlyMyCommunities)
             .Where(p => !tagsId.Any() || p.Tags.Any(t => tagsId.Contains(t.Id)))
             .Where(p => author == null || p.Author.FullName.ToLower().Contains(author.ToLower()))
             .Where(p => (min == null || p.ReadingTime >= min) && (max == null || p.ReadingTime <= max));
-
-        var sortedQueryable = sorting switch
-        {
-            PostSorting.CreateDesc => queryable.OrderByDescending(p => p.CreateTime),
-            PostSorting.CreateAsc => queryable.OrderBy(p => p.CreateTime),
-            PostSorting.LikeAsc => queryable.OrderBy(p => p.Likes),
-            PostSorting.LikeDesc => queryable.OrderByDescending(p => p.Likes),
-            _ => throw new ArgumentOutOfRangeException(nameof(sorting), sorting, null)
-        };
-
-        var result = await sortedQueryable
-            .Skip((page - 1) * size)
-            .Take(size)
-            .Select(post => new PostInformation
-            {
-                Id = post.Id,
-                CreateTime = post.CreateTime,
-                Title = post.Title,
-                Description = post.Description,
-                ReadingTime = post.ReadingTime,
-                Image = post.Image,
-                AuthorId = post.AuthorId,
-                Author = post.Author.FullName,
-                CommunityId = post.CommunityId,
-                CommunityName = post.Community != null ? post.Community.Name : null,
-                AddressId = post.AddressId,
-                Likes = post.Likes,
-                CommentsCount = post.CommentsCount,
-                Tags = post.Tags
-            })
-            .ToListAsync();
-
-        if (result.Count == 0 && page != 1)
-        {
-            throw new InvalidPageException("Invalid value for attribute page");
-        }
-
-        foreach (var post in result)
-        {
-            post.HasLike = await HasUserLikedPost(post.Id);
-        }
         
-        var count = await queryable.CountAsync();
-
-        return new PostPagedList
-        {
-            Posts = result,
-            Pagination = new PageInfo
-            {
-                Count = (int)Math.Ceiling((double)count / size),
-                Current = page,
-                Size = size
-            }
-        };
+        return await _sortingTools.GetPostPagedListAsync(queryable, sorting, page, size);
     }
 
     public async Task<PostResponse> CreatePostAsync(CreatePost createPost)
@@ -97,7 +47,7 @@ public class PostService : IPostService
             ReadingTime = createPost.ReadingTime,
             Image = createPost.Image,
             AddressId = createPost.AddressId,
-            Tags = await _communityAccess.GetTags(createPost.Tags.Distinct()),
+            Tags = await _sortingTools.GetTagsAsync(createPost.Tags.Distinct()),
             AuthorId = _tokenService.GetUserId()
         };
 
@@ -126,7 +76,7 @@ public class PostService : IPostService
             CommunityName = post.Community?.Name,
             AddressId = post.AddressId,
             Likes = post.Likes,
-            HasLike = await HasUserLikedPost(postId),
+            HasLike = await _sortingTools.HasUserLikedPostAsync(postId),
             CommentsCount = post.CommentsCount,
             Tags = post.Tags,
             Comments = await _context.Comments
@@ -141,7 +91,7 @@ public class PostService : IPostService
     {
         await _communityAccess.CheckCommunityByPost(id);
         var post = await GetPostByIdWithAuthorAsync(id);
-        var user = await GetUserWithLikedPostsAsync();
+        var user = await _sortingTools.GetUserWithLikedPostsAsync();
         EnsureNoLikeExists(user, id);
         ChangeLikeCounter(true, post);
         user.LikedPosts.Add(post);
@@ -152,7 +102,7 @@ public class PostService : IPostService
     {
         await _communityAccess.CheckCommunityByPost(id);
         var postToRemove = await GetPostByIdWithAuthorAsync(id);
-        var user = await GetUserWithLikedPostsAsync();
+        var user = await _sortingTools.GetUserWithLikedPostsAsync();
         EnsureLikeExists(user, id);
         ChangeLikeCounter(false, postToRemove);
         user.LikedPosts.Remove(postToRemove);
@@ -189,28 +139,6 @@ public class PostService : IPostService
 
         return _context.Posts
             .Where(p => p.CommunityId == null || communities.Contains(p.CommunityId ?? Guid.Empty));
-    }
-
-    private async Task<bool> HasUserLikedPost(Guid postId)
-    {
-        if (!_tokenService.IsAuthenticated()) return false;
-        var user = await GetUserWithLikedPostsAsync();
-        return user.LikedPosts.Any(p => p.Id == postId);
-    }
-
-    private async Task<User> GetUserWithLikedPostsAsync()
-    {
-        var id = _tokenService.GetUserId();
-        var user = await _context.Users
-            .Include(user => user.LikedPosts)
-            .FirstOrDefaultAsync(u => u.Id == id);
-
-        if (user == null)
-        {
-            throw new UserNotFoundException("User not found");
-        }
-
-        return user;
     }
 
     private void ChangeLikeCounter(bool isLike, Post post)
