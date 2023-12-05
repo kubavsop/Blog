@@ -45,12 +45,10 @@ public class CommunityService : ICommunityService
 
     public async Task MakeUserAdminAsync(Guid communityId, Guid userId)
     {
-        if (!await _context.Communities.AnyAsync(c => c.Id == communityId))
-        {
-            throw new CommunityNotFoundException($"Community with id={communityId} not found in  database");
-        }
-
+        var community = await _communityAccess.GetCommunityAsync(communityId);
+        
         var adminId = _tokenService.GetUserId();
+        
         if (!await _context.CommunityUser.AnyAsync(cu =>
                 cu.CommunityId == communityId && cu.UserId == adminId && cu.Role == CommunityRole.Administrator))
         {
@@ -68,9 +66,10 @@ public class CommunityService : ICommunityService
         {
             throw new UserRoleException($"User with id={userId} is already an administrator");
         }
-
+        
         communityUser.Role = CommunityRole.Administrator;
-
+        community.SubscribersCount--;
+        
         await _context.SaveChangesAsync();
     }
 

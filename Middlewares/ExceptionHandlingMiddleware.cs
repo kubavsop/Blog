@@ -139,6 +139,6 @@ public class ExceptionHandlingMiddleware
     private class Error
     {
         public int StatusCode { get; set; }
-        public string Message { get; set; }
+        public required string Message { get; set; }
     }
 }

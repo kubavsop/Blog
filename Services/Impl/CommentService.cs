@@ -22,6 +22,8 @@ public class CommentService : ICommentService
     public async Task<IEnumerable<Comment>> GetCommentsAsync(Guid commentId)
     {
         var comment = await GetCommentAsync(commentId);
+
+        await _communityAccess.CheckCommunityByPost(comment.PostId);
         
         if (comment.ParentId != null)
         {
