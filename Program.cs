@@ -61,10 +61,9 @@ var app = builder.Build();
 var dbContext = app.Services.CreateScope().ServiceProvider.GetService<AppDbContext>();
 var migrator = app.Services.GetRequiredService<DatabaseMigrator>();
 
-if (dbContext != null && dbContext.Database.GetPendingMigrations().Any())
+if (await dbContext?.Database.EnsureCreatedAsync()!)
 {
-    dbContext.Database.EnsureCreated();
-    dbContext.Database.Migrate();
+    await dbContext.Database.MigrateAsync();
     migrator.Migrate();
 }
 

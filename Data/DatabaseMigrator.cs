@@ -13,22 +13,37 @@ public class DatabaseMigrator
     public void Migrate()
     {
         var defaultConnection = _configuration.GetConnectionString("DefaultConnection");
-        var sqlScriptsPath = _configuration.GetConnectionString("SqlScripsPath");
         var nlogConnection = _configuration.GetConnectionString("Nlog");
+        
+        var blogSqlScriptsPath = _configuration.GetConnectionString("BlogSqlScrips");
+        var nlogSqlScriptsPath = _configuration.GetConnectionString("NlogSqlScrips");
         
         var appDbContextUpgradeEngine = DeployChanges.To
             .PostgresqlDatabase(defaultConnection)
-            .WithScriptsFromFileSystem(sqlScriptsPath)
+            .WithScriptsFromFileSystem(blogSqlScriptsPath)
             .LogToConsole()
             .Build();
         
+        EnsureDatabase.For.PostgresqlDatabase(nlogConnection);
         
+        var nlogUpgradeEngine = DeployChanges.To
+            .PostgresqlDatabase(nlogConnection)
+            .WithScriptsFromFileSystem(nlogSqlScriptsPath)
+            .LogToConsole()
+            .Build();
         
-        var result = appDbContextUpgradeEngine.PerformUpgrade();
+        var blogResult = appDbContextUpgradeEngine.PerformUpgrade();
 
-        if (!result.Successful)
+        if (!blogResult.Successful)
         {
-            throw new Exception(result.Error.ToString());
+            throw blogResult.Error;
+        }
+        
+        var nlogResult = nlogUpgradeEngine.PerformUpgrade();
+
+        if (!nlogResult.Successful)
+        {
+            throw nlogResult.Error;
         }
     }
 }
