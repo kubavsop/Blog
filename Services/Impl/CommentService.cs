@@ -106,7 +106,7 @@ public class CommentService : ICommentService
         await _context.SaveChangesAsync();
     }
 
-    private async Task GetCommentTreeAsync(List<Comment> comments, Comment rootComment)
+    private async Task GetCommentTreeAsync(ICollection<Comment> comments, Comment rootComment)
     {
         var stack = new Stack<Comment>();
 

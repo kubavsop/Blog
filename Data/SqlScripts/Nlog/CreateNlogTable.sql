@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS public.NLog
     Level       VARCHAR(10) NOT NULL,
     Message     TEXT       NOT NULL,
     Logger      VARCHAR(300),
-    Properties  TEXT,
     Callsite    VARCHAR(300),
     Exception   TEXT
 );
