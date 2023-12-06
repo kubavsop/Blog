@@ -56,6 +56,6 @@ public class TokenProvider : ITokenProvider
 
     private static string GenerateRandomString()
     {
-        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        return Convert.ToBase64String(RandomNumberGenerator.GetBytes(128));
     }
 }

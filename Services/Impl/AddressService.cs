@@ -43,16 +43,14 @@ public class AddressService : IAddressService
             throw new AddressNotFoundException($"Not found object with ObjectGuid={objectGuid}");
         }
 
-        var addressChain = new List<AddressElement>();
+        var addressChain = new LinkedList<AddressElement>();
 
         while (parentObject != null)
         {
-            addressChain.Add(parentObject);
+            addressChain.AddFirst(parentObject);
             parentObject =
                 await _context.AddressElements.FirstOrDefaultAsync(a => a.ObjectId == parentObject.ParentObjId);
         }
-
-        addressChain.Reverse();
 
         return addressChain;
     }
