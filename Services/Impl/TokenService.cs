@@ -13,19 +13,22 @@ public class TokenService: ITokenService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
     private readonly IDistributedCache _distributedCache;
 
-    public TokenService(IHttpContextAccessor accessor, AppDbContext context, IDistributedCache distributedCache)
+    public TokenService(IHttpContextAccessor accessor, AppDbContext context, IDistributedCache distributedCache, IConfiguration configuration)
     {
         _httpContextAccessor = accessor;
         _context = context;
         _distributedCache = distributedCache;
+        _configuration = configuration;
     }
 
     public async Task InvalidateTokenAsync()
     {
+        var expireMinutes = _configuration.GetValue<double>("AppSettings:AccessTokenExpireMinutes");
         var options = new DistributedCacheEntryOptions()
-            .SetAbsoluteExpiration(DateTimeOffset.Now.AddSeconds(10));
+            .SetAbsoluteExpiration(DateTimeOffset.Now.AddMinutes(expireMinutes));
         
         var tokenId = GetTokenId().ToString();
         await _distributedCache.SetStringAsync(tokenId, "1", options);

@@ -119,6 +119,16 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(exception, exception.Message);
             await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
         }
+        catch (RefreshTokenNotFoundException exception)
+        {
+            _logger.LogWarning(exception, exception.Message);
+            await SetExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
+        }
+        catch (RefreshTokenHasExpiredException exception)
+        {
+            _logger.LogWarning(exception, exception.Message);
+            await SetExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+        }
         catch (Exception exception)
         {
             _logger.LogError(exception, exception.Message);

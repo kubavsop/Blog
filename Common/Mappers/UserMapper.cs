@@ -32,7 +32,8 @@ internal static class UserMapper
     {
         return new TokenResponseDto
         {
-            Token = tokenResponse.Token
+            AccessToken = tokenResponse.AccessToken,
+            RefreshToken = tokenResponse.RefreshToken
         };
     }
 

@@ -9,14 +9,34 @@ namespace Blog.API.Services.Impl;
 public class UserService : IUserService
 {
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
     private readonly ITokenProvider _tokenProvider;
     private readonly ITokenService _tokenService;
 
-    public UserService(AppDbContext context, ITokenProvider tokenProvider, ITokenService tokenService)
+    public UserService(AppDbContext context, ITokenProvider tokenProvider, ITokenService tokenService, IConfiguration configuration)
     {
         _context = context;
         _tokenProvider = tokenProvider;
         _tokenService = tokenService;
+        _configuration = configuration;
+    }
+
+    public async Task<TokenResponse> RefreshAsync(string token)
+    {
+        var refreshToken = await GetRefreshTokenAsync(token);
+        if (refreshToken.IsExpired)
+        {
+            _context.RefreshTokens.Remove(refreshToken);
+            await _context.SaveChangesAsync();
+            throw new RefreshTokenHasExpiredException("Token has expired");
+        }
+
+        var tokenResponse = await CreateTokenResponseAsync(refreshToken.UserId);
+        
+        _context.RefreshTokens.Remove(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return tokenResponse;
     }
 
     public async Task<User> GetUserAsync()
@@ -44,7 +64,8 @@ public class UserService : IUserService
     public async Task<TokenResponse> LoginUserAsync(LoginCredentials loginCredentials)
     {
         var id = await CheckUserExistenceAsync(loginCredentials);
-        return _tokenProvider.CreateToken(id);
+        var tokenResponse = await CreateTokenResponseAsync(id);
+        return tokenResponse;
     }
 
     public async Task<TokenResponse> CreateUserAsync(User user)
@@ -52,12 +73,40 @@ public class UserService : IUserService
         await CheckEmailExistenceAsync(user.Email);
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
-        return _tokenProvider.CreateToken(user.Id);
+        return await CreateTokenResponseAsync(user.Id);
     }
 
     public async Task LogoutUserAsync()
     {
         await _tokenService.InvalidateTokenAsync();
+    }
+
+    private async Task<TokenResponse> CreateTokenResponseAsync(Guid id)
+    {
+        var tokenResponse = _tokenProvider.CreateTokenResponse(id);
+        var expireMinutes = _configuration.GetValue<double>("AppSettings:RefreshTokenExpireMinutes");
+        
+        await _context.RefreshTokens.AddAsync(new RefreshToken
+        {
+            ExpirationTime = DateTime.UtcNow.AddMinutes(expireMinutes),
+            Token = tokenResponse.RefreshToken,
+            UserId = id
+        });
+        await _context.SaveChangesAsync();
+        
+        return tokenResponse;
+    }
+
+    private async Task<RefreshToken> GetRefreshTokenAsync(string token)
+    {
+        var refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == token);
+
+        if (refreshToken == null)
+        {
+            throw new RefreshTokenNotFoundException("Token not found in database");
+        }
+
+        return refreshToken;
     }
 
     private async Task<Guid> CheckUserExistenceAsync(LoginCredentials credentials)

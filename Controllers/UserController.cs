@@ -27,6 +27,13 @@ public class UserController: ControllerBase
         return Ok(tokenResponseDto);
     }
 
+    [HttpPost("refresh")]
+    public async Task<ActionResult<TokenResponseDto>> RefreshAsync(RefreshRequestDto requestDto)
+    {
+        var tokenResponse = await _userService.RefreshAsync(requestDto.Token);
+        return Ok(UserMapper.TokenResponseToTokenResponseDto(tokenResponse));
+    }
+
     [HttpPost("login")]
     public async Task<ActionResult<TokenResponseDto>> LoginAsync(LoginCredentialsDto credentialsDto)
     {

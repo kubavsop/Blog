@@ -8,8 +8,6 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User> Users { get; set; }
-    public DbSet<InvalidTokens> Tokens { get; set; }
-
     public DbSet<Post> Posts { get; set; }
 
     public DbSet<Tag> Tags { get; set; }
@@ -21,10 +19,16 @@ public class AppDbContext : DbContext
     public DbSet<Community> Communities { get; set; }
 
     public DbSet<CommunityUser> CommunityUser { get; set; }
+    
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<RefreshToken>()
+            .HasIndex(t => t.Token)
+            .IsUnique();
         
         builder.Entity<User>()
             .HasIndex(user => user.Email)

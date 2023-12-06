@@ -7,5 +7,9 @@ public class TokenResponseDto
 {
     [Required]
     [MinLength(1)]
-    public string Token { get; set; }
+    public required string AccessToken { get; set; }
+    
+    [Required]
+    [MinLength(1)]
+    public required string RefreshToken { get; set; }
 }
