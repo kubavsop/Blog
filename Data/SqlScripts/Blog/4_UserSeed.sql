@@ -1,0 +1,15 @@
+INSERT INTO public."Users"
+VALUES ('620281c6-288c-4fdd-bf89-530223a5d20e', 'kubavsop',
+        '$2a$11$RHEHLLuw0efaKh8HXylwl.YZWHszdqJWrvYYGHz/PPpSpqm0VM3Ty', '2023-12-05 22:20:04.364+07',
+        '2023-12-06 13:11:35.910522+07', 0, '+7 (912) 923-21-12', 'user@example.com', 0),
+       ('67627432-4ea5-4c15-9751-d1459e8920f1', 'Author',
+        '$2a$11$2JNtENdlBxf58n.xApALf.D3qrjVxIWtvR9eOD6j3XHHALcuiWV9q', '2023-12-05 22:20:04.364+07',
+        '2023-12-06 15:37:29.928364+07', 0, '+7 (912) 923-21-12', 'new@example.com', 1),
+       ('d6d9cbce-1d09-40f4-808c-8225921de2d1', 'kubavsop',
+        '$2a$11$GBN0I7wONQRW.p/jCjy8zOfmng5lfcTNc9FzL3E7VUhiGI4PuYweC', '2023-12-05 22:20:04.364+07',
+        '2023-12-06 17:07:12.652146+07', 0, '+7 (912) 923-21-12', '24user@example.com', 0),
+       ('15e3f837-8fa1-434d-8da8-bc3a4fac5b61', 'Ivan', '$2a$11$0Gco5LLG6pW7AVys.HWlHOJbd4j9rBRjRYx3C3LHazyZ.SSQzkqcO',
+        '2023-12-06 15:16:14.089+07', '2023-12-06 13:15:17.466917+07', 1, '+7 (912) 123-12-54', 'myNew@example.com', 7),
+       ('493f985b-dec8-42ad-b8d8-f60de4832881', 'kubavsop',
+        '$2a$11$RhySHFVRjfjzoeKJpQsgru2oaVAX9UswIxSK1huRVgkonXx/1pg6S', '2023-12-05 22:20:04.364+07',
+        '2023-12-06 18:08:37.251113+07', 0, '+7 (912) 923-21-12', '2user@example.com', 0);

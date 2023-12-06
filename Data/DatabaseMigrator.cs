@@ -22,6 +22,8 @@ public class DatabaseMigrator
             .PostgresqlDatabase(defaultConnection)
             .WithScriptsFromFileSystem(blogSqlScriptsPath)
             .LogToConsole()
+            .LogScriptOutput()
+            .WithVariablesDisabled()
             .Build();
         
         EnsureDatabase.For.PostgresqlDatabase(nlogConnection);
@@ -30,6 +32,8 @@ public class DatabaseMigrator
             .PostgresqlDatabase(nlogConnection)
             .WithScriptsFromFileSystem(nlogSqlScriptsPath)
             .LogToConsole()
+            .LogScriptOutput()
+            .WithVariablesDisabled()
             .Build();
         
         var blogResult = appDbContextUpgradeEngine.PerformUpgrade();
