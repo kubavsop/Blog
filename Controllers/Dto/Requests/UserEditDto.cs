@@ -8,6 +8,7 @@ public class UserEditDto
 {
     [Required]
     [MinLength(1)]
+    [MaxLength(100)]
     public string FullName { get; set; }
     
     [Date]
@@ -21,6 +22,7 @@ public class UserEditDto
     
     [Required]
     [MinLength(1)]
+    [MaxLength(100)]
     [EmailAddress]
     public string Email { get; set; }
 }   
