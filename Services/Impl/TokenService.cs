@@ -40,10 +40,10 @@ public class TokenService: ITokenService
         return await GetUserById(id);
     }
 
-    public async Task<bool> CheckTokenAsync()
+    public bool CheckToken()
     {
         var tokenId = GetTokenId().ToString();
-        return await _distributedCache.GetAsync(tokenId) != null;
+        return _distributedCache.Get(tokenId) != null;
     }
     
     private async Task<User> GetUserById(Guid id)
@@ -58,7 +58,7 @@ public class TokenService: ITokenService
     
     public Guid GetUserId()
     {
-        if (_httpContextAccessor.HttpContext?.User.Identity is { IsAuthenticated: true })
+        if (_httpContextAccessor.HttpContext?.User.Identity is { IsAuthenticated: true } && !CheckToken())
         {
             return Guid.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Name)!);
         }
@@ -67,7 +67,7 @@ public class TokenService: ITokenService
 
     public bool IsAuthenticated()
     {
-        return _httpContextAccessor.HttpContext?.User.Identity is { IsAuthenticated: true };
+        return _httpContextAccessor.HttpContext?.User.Identity is { IsAuthenticated: true } && !CheckToken();
     }
     
     private Guid GetTokenId()

@@ -7,6 +7,6 @@ public interface ITokenService
     Task InvalidateTokenAsync();
     Task<User> GetUserAsync();
     Guid GetUserId();
-    Task<bool> CheckTokenAsync();
+    bool CheckToken();
     bool IsAuthenticated();
 }
